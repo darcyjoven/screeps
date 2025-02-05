@@ -1,0 +1,4 @@
+screeps.json
+dist
+yarn.lock
+node_modules
