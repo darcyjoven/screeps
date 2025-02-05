@@ -10,6 +10,5 @@ export const loop = ErrorMapper.wrapLoop(() => {
     if (!(name in Game.creeps)) {
       delete Memory.creeps[name];
     }
-  } 
-  console.log("darcy")
+  }  
 });

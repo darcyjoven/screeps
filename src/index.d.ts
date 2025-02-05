@@ -1,0 +1,1 @@
+type bodyConfig = WORK | MOVE | CARRY
