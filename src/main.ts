@@ -1,4 +1,4 @@
-import { ErrorMapper } from "utils/ErrorMapper"; 
+import { ErrorMapper } from "utils/ErrorMapper";
 
 // When compiling TS to JS and bundling with rollup, the line numbers and file names in error messages change
 // This utility uses source maps to get the line numbers and file names of the original, TS source code
@@ -10,5 +10,13 @@ export const loop = ErrorMapper.wrapLoop(() => {
     if (!(name in Game.creeps)) {
       delete Memory.creeps[name];
     }
-  }  
+  }
 });
+
+
+/**
+ * 接受两个数字并相加
+ */
+export const testFn = function (num1: number, num2: number): number {
+  return num1 + num2
+}  

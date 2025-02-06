@@ -7,13 +7,15 @@
     "build": "rollup -c",
     "push-ptr": "rollup -c --bundleConfigAsCjs --environment DEST:ptr",
     "watch-main": "rollup -cw --environment DEST:main",
-    "test": "jest"
+    "test": "jest",
+    "test-c": "jest --coverage"
   },
   "type": "commonjs",
   "devDependencies": {
     "@jest/globals": "^29.7.0",
     "@rollup/plugin-commonjs": "^28.0.2",
     "@rollup/plugin-node-resolve": "^16.0.0",
+    "@screeps/common": "^2.15.5",
     "@types/jest": "^29.5.14",
     "@types/lodash": "^4.17.15",
     "@types/node": "^22.13.1",
