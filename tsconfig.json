@@ -17,10 +17,13 @@
     "allowUmdGlobalAccess": true
   },
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "src/**/*.test.ts"
   ],
   "include": [
     "src/**/*.ts",
-    "screeps.d.ts"
+    "src/**/*.d.ts",
+    "screeps.d.ts",
+    "global.d.ts"
   ]
 }
