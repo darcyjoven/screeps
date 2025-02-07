@@ -1,6 +1,6 @@
 import { getBodyConfig } from "./creep"; // 请根据你的文件结构调整路径
-// import { BodyPartConstant } from "screeps";
-/// <reference path="../index.d.ts" />
+import { getMockCreep } from "../../test/mock/creep";
+
 
 describe("getBodyConfig", () => {
   test("应该返回 Harvester 在 Controller 1 级的身体配置", () => {
@@ -10,16 +10,16 @@ describe("getBodyConfig", () => {
 
   test("应该返回 Harvester 在 Controller 5 级的身体配置", () => {
     const result = getBodyConfig('Harvester', 5);
-    expect(result?.filter(item=>item===WORK).length).toEqual(10)
-    expect(result?.filter(item=>item===CARRY).length).toEqual(1)
-    expect(result?.filter(item=>item===MOVE).length).toEqual(5) 
+    expect(result?.filter(item => item === WORK).length).toEqual(10)
+    expect(result?.filter(item => item === CARRY).length).toEqual(1)
+    expect(result?.filter(item => item === MOVE).length).toEqual(5)
   });
 
   test("应该返回 Manager 在 Controller 8 级的身体配置", () => {
     const result = getBodyConfig('Harvester', 8);
-    expect(result?.filter(item=>item===WORK).length).toEqual(12)
-    expect(result?.filter(item=>item===CARRY).length).toEqual(1)
-    expect(result?.filter(item=>item===MOVE).length).toEqual(6) 
+    expect(result?.filter(item => item === WORK).length).toEqual(12)
+    expect(result?.filter(item => item === CARRY).length).toEqual(1)
+    expect(result?.filter(item => item === MOVE).length).toEqual(6)
   });
 
   test("应该返回 Claimer 在 Controller 4 级的身体配置", () => {
@@ -37,3 +37,14 @@ describe("getBodyConfig", () => {
     expect(result).toEqual([WORK, WORK, CARRY, MOVE]); // 使用默认级别配置
   });
 });
+
+it('mock Creep 可以正常使用', () => {
+  // 创建一个 creep 并指定其属性
+  const creep = getMockCreep({
+    name: 'test',
+    ticksToLive: 100,
+  })
+
+  expect(creep.name).toBe('test')
+  expect(creep.ticksToLive).toBe(100)
+})
