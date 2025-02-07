@@ -1,40 +1,50 @@
 
-/*
-creep身体种类
-*/
-type BodyContent = MOVE | WORK | CARRY | ATTACK | RANGED_ATTACK | TOUGH | HEAL | CLAIM;
+type BodyConfigRole = 'HarvesterBody' | 'WorkerBody' | 'HaulerBody' |
+  'DefenderBody' | 'RangedBody' | 'HealerBody' | 'RemoteHarvesterBody' |
+  'RemoteHauler' | 'RemoteDefenderBody' | 'ClaimerBody' | 'DismantlerBody' |
+  'ProcessorBody'
 
+/**
+ * 基础运营
+ */
+type BaseRole = 'Harvester' | 'Worker' | 'Hauler' | 'Collector' | 'Upgrader'
+  | 'Builder' | 'Filler' | 'Processor' | 'Manager'
+/**
+ * 防御
+ */
+type DenfenderRole = 'Denfender' | 'Ranged' | 'Healer'
+/**
+ * 远程挖矿
+ */
+type RemoteRole = 'RemoteHarvester' | 'RemoteHauler' | 'RemoteDefender'
+/**
+ * 高级单位
+ */
+type AdvanceRole = 'Claimer' | 'Dismantler'
+/**
+ * 所有Role
+ */
+type CreepRole = BaseRole | DenfenderRole | RemoteRole | AdvanceRole
 
-/*
-  角色类型
-*/
-type HARVESTER = 'harvester'
-type WORKER = 'worker'
-type UPGRADER = 'upgrader'
-type ATTACKER = 'attacker'
-type HEALER = 'healer'
-type DISMANTLER = 'dismantler'
-// type manager = 'manager'
-// type processor = 'processor'
-// type reserver = 'reserver'
-// type remoteHarvester = 'remoteHarvester'
+type BodySet = Partial<Record<BodyPartConstant, number>>
 
-// 角色
-type Roles = HARVESTER | WORKER | UPGRADER | ATTACKER | HEALER | DISMANTLER
+type BodyConfig = Record<BodyConfigRole,
+  [BodySet, BodySet, BodySet, BodySet, BodySet, BodySet, BodySet, BodySet]>
 
-interface BodySet {
-  [MOVE]?: number
-  [CARRY]?: number
-  [ATTACK]?: number
-  [RANGED_ATTACK]?: number
-  [WORK]?: number
-  [CLAIM]?: number
-  [TOUGH]?: number
-  [HEAL]?: number
+interface Memory {
+  creepConfigs: {
+    [creepName: string]: {
+      name: string,
+      spawnRoom: string,
+      bodys: BodyPartConstant[],
+      data: object
+    }
+  }
 }
 
-type BodyArray = [BodySet, BodySet, BodySet, BodySet, BodySet, BodySet, BodySet, BodySet]
-
-type BodyConfigs = {
-  [type in Roles]: BodyArray
+interface CreepMemory {
+  reSpawn: boolean
 }
+
+
+type Colors = 'green' | 'blue' | 'yellow' | 'red'

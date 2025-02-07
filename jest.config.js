@@ -11,5 +11,8 @@ module.exports = {
         "^(utils/.+)$": "<rootDir>/src/$1"
       },
     // moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths || {}, { prefix: '<rootDir>/' }),
-    moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node']
+    moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+    setupFilesAfterEnv : [
+        '<rootDir>/test/setup.ts'
+    ],
 }

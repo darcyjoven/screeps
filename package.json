@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build": "rollup -c",
+    "build": "rollup -c --bundleConfigAsCjs",
     "push-ptr": "rollup -c --bundleConfigAsCjs --environment DEST:ptr",
     "watch-main": "rollup -cw --environment DEST:main",
     "test": "jest",
