@@ -6,9 +6,8 @@
   "scripts": {
     "build": "rollup -c --bundleConfigAsCjs",
     "push-ptr": "rollup -c --bundleConfigAsCjs --environment DEST:ptr",
-    "watch-main": "rollup -cw --environment DEST:main",
-    "test": "jest",
-    "test-c": "jest --coverage"
+    "test": "jest src/",
+    "test-c": "jest --coverage src/"
   },
   "type": "commonjs",
   "devDependencies": {
