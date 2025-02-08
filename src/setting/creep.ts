@@ -2,10 +2,10 @@
  * 映射角色对应审核配置
  */
 const bodyRoleMap: Record<BodyConfigRole, CreepRole[]> = {
-  HarvesterBody: ['Harvester', 'Collector'],
-  WorkerBody: ['Filler', 'Upgrader', 'Builder'],
+  HarvesterBody: ['Harvester'],
+  WorkerBody: ['Filler', 'Collector', 'Upgrader', 'Builder'],
   HaulerBody: ['Manager'],
-  DefenderBody: ['Denfender'],
+  DefenderBody: ['Defender'],
   RangedBody: ['Ranged'],
   HealerBody: ['Healer'],
   RemoteHarvesterBody: ['RemoteHarvester'],
@@ -149,8 +149,8 @@ export function getBodyConfig(role: CreepRole, controllerLevel: number): BodyPar
   for (const [bodyRole, roles] of Object.entries(bodyRoleMap)) {
     if (roles.includes(role)) {
       const levelConfig = bodyConfigs[bodyRole as BodyConfigRole];
-      const partsConfig = levelConfig[controllerLevel-1] || levelConfig[0]; // 默认最低级别配置
-      
+      const partsConfig = levelConfig[controllerLevel - 1] || levelConfig[0]; // 默认最低级别配置
+
       return Object.entries(partsConfig)
         .map(([part, count]) => Array(count).fill(part as BodyPartConstant))
         .reduce((acc, val) => acc.concat(val), []); // 使用 reduce 兼容 Node 10
