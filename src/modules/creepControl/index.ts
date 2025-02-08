@@ -29,10 +29,20 @@ interface CreepControlerContext {
  * @returns 暴露出去可以用的内容
  */
 export const createCreepControler = (content: CreepControlerContext) => {
-    const spawnCreep = (body: BodyPartConstant[], name?: string, memory?: CreepMemory): ScreepsReturnCode | string => {
+    /**
+     * 孵化creep
+     * @param type 角色类型或者身体类型
+     * @param name 橘色名称
+     * @param memory 默认配置
+     * @returns 错误代码
+     */
+    const spawnCreep = (type: CreepRole | BodyPartConstant[], name?: string, memory?: CreepMemory): ScreepsReturnCode | string => {
         return OK
     }
+    // creep死亡通知
+    const parting = (name: string, memory: CreepMemory) => { }
+    // 检查运维数量
     const run = () => { }
 
-    return { spawnCreep, run }
+    return { spawnCreep, parting, run }
 }
