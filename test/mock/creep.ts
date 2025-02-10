@@ -7,13 +7,18 @@ class CreepMock {
     hits: number = 100
     hitsMax: number = 100
     id: Id<this> = `${new Date().getTime()}${Math.random()}` as Id<this>
-    memory: CreepMemory = { reSpawn: false }
+    memory = {
+        role: '',
+        reSpawn: false,
+        ready: false,
+        data: {}
+    }
     my: boolean = true
     name: string = `creep${this.id}`
     owner: Owner = { username: 'hopgoldy' }
     room?: Room
     spawning: boolean = false
-    saying: string =''
+    saying: string = ''
     store?: StoreDefinition
     ticksToLive: number | undefined = 1500
 }
