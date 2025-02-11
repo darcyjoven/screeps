@@ -22,4 +22,11 @@ export default class SearchExtension extends Room {
             return freeCount - harvestCount > 0
         }) as Source
     }
+    /**
+     * 获取禁止通过的位置
+     * @returns 
+     */
+    public getAvoidPos(): { [creepName: string]: string } {
+        return {}
+    }
 }

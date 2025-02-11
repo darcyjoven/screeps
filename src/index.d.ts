@@ -78,13 +78,30 @@ type CreepData = EmptyData | WorkerData | ProcessorData | RemoteHarvesterData |
 
 /**************** 内存管理 ********************/
 interface Memory {
+  bypassRooms: string[]
 }
 // Creep的内存管理
 interface CreepMemory {
+  // 是否去对穿
+  crossable: boolean
+  // 是否被对穿
+  standed: boolean
   role: string
   reSpawn: boolean
   ready: boolean
   data: {}
+  goCache: boolean
+  move?: {
+    far: boolean
+    // 序列化之后的路径信息
+    path?: string
+    // 移动索引，标志 creep 现在走到的第几个位置
+    index: number
+    // 上一个位置信息，形如"14/4"，用于在 creep.move 返回 OK 时检查有没有撞墙
+    prePos?: string
+    // 缓存路径的目标，该目标发生变化时刷新路径, 形如"14/4E14S1"
+    targetPos?: string
+  }
 }
 
 interface FlagMemory { }
@@ -92,6 +109,19 @@ interface PowerCreepMemory { }
 // 房间的内存管理 
 interface RoomMemory {
   spawnList: string[] // 孵化清单
+  // 路径缓存
+  routeCache: {
+    // 键为路径的起点和终点名，例如："12/32/W1N1 23/12/W2N2"，值是使用 Creep.serializeFarPath 序列化后的路径
+    [routeKey: string]: {
+      path: string,
+      lastUsed: number
+    }
+  },
+  // 准备的点
+  standBy?: {
+    x: number,
+    y: number
+  }
 }
 interface SpawnMemory {
   belong: string | null
@@ -99,13 +129,15 @@ interface SpawnMemory {
 
 /**************** Room扩展属性 ********************/
 interface Room {
+  serializePath(path: PathStep[]): string;
+  deserializePath(path: string): PathStep[];
   sources: Source[]
   sourceContainers: StructureContainer[]
+  getAvoidPos(): { [creepName: string]: string }
+  getAvailableSource(): StructureTerminal | StructureStorage | StructureContainer | Source
 }
 
 type Colors = 'green' | 'blue' | 'yellow' | 'red'
-
-
 
 /**************** Extension ********************/
 
@@ -114,23 +146,13 @@ interface RoomPosition {
   directionToPos(direction: DirectionConstant): RoomPosition | undefined
   getFreeSpace(): RoomPosition[]
 }
-/**************** Room ********************/
-interface Room {
-
-}
-
-/**************** Creep ********************/
-interface Room {
-
-}
-/**************** Spawn ********************/
-interface StructureSpawn {
-
-}
 
 /**************** Extension ********************/
+
 /**************** Creep ********************/
 interface Creep {
+  // 是否允许对穿
+  _move(target: DirectionConstant | Creep): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND
   work(): void;
   standBy(): void;
   defense(): void;
@@ -143,9 +165,12 @@ interface Creep {
   attackFlag(flag: string, healer: string): boolean;
   dismantleFlag(flag: string, healer: string): boolean;
   healTo(creep: Creep): void;
-  dash(target: RoomPosition): CreepMoveReturnCode | ERR_NOT_IN_RANGE | ERR_INVALID_TARGET;
-  race(target: RoomPosition): CreepMoveReturnCode | ERR_NOT_IN_RANGE | ERR_INVALID_TARGET;
-  marathon(target: RoomPosition): CreepMoveReturnCode | ERR_NOT_IN_RANGE | ERR_INVALID_TARGET;
+  serializeFarPath(positions: RoomPosition[]): string;
+  dash(target: RoomPosition): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND;
+  race(target: RoomPosition): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND;
+  marathon(target: RoomPosition): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND;
+  goTo(target: RoomPosition): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND;
+  goByCache(): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND
 }
 
 /**************** terminal ********************/

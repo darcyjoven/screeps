@@ -20,3 +20,30 @@ export const unserializePos = (posStr: string): RoomPosition | undefined => {
 
     return infos.length === 3 ? new RoomPosition(Number(infos[0]), Number(infos[1]), infos[2]) : undefined
 }
+
+
+export const serializePath = (path: RoomPosition[]): string => {
+    let result = ''
+    for (const pos of path) {
+        result += serializePos(pos) + ','
+    }
+    return result
+}
+export const unserializePath = (pathStr: string): RoomPosition[] => {
+    const result: RoomPosition[] = []
+
+    const positions = pathStr.split(',')
+
+    for (let i = 0; i < positions.length; i++) {
+        const pos = unserializePos(positions[i])
+        if (pos) result[i] = pos
+    }
+    return result
+}
+
+/**
+ * 获得指定方向相反方向
+ */
+export function getOppositeDirection(direction: DirectionConstant): DirectionConstant {
+    return <DirectionConstant>((direction + 3) % 8 + 1)
+ }
