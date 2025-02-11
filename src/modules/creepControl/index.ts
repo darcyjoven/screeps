@@ -1,33 +1,31 @@
-import { nanoid } from 'nanoid'
 import { removeArray } from 'utils/tool'
 import { stateAction, getCurrentState } from './state'
-import { config } from 'process'
 
 type Role = 'harvester' | 'collector' | 'filler' | 'manager' | 'processor' | 'upgrader' | 'builder'
 
 interface CreepControl {
-  name?: string
   role: Role
   data?: CreepMemory
 }
 // 运维阶段
 export type OperationState = 'claim' | 'container' | 'storage' | 'link'
 
-
 // 内存配置（CNC Creep Number Control）
-interface CNCMemory {
+export declare interface CNCMemory {
   creep: { [key: string]: CreepControl[] }
   config: {
     currentState: OperationState
   }
 }
-interface CreepControlerContext {
+export declare interface CreepControlerContext {
   // 房间名称
   room: string
   // 获取当前Memory
   getMemory: () => CNCMemory
   // 判断creep角色
   getRole: (creep: Creep) => Role | undefined
+  // creep命名
+  getName: (role: Role) => string
   // 获得身体配置
   getBodyPart: (role: Role) => BodyPartConstant[]
   /**
@@ -40,9 +38,7 @@ interface CreepControlerContext {
   remandSpawn: () => boolean
 }
 
-// 当前模块的内存配置
-
-const generateCreepId = (): string => nanoid(5)
+const generateCreepId = (): string => Math.random().toString(36).substring(2, 5);
 
 // 阶段性配置
 const creepControls: Record<OperationState, CreepControl[]> = {
@@ -63,17 +59,18 @@ const creepControls: Record<OperationState, CreepControl[]> = {
 export const createCreepControler = (context: CreepControlerContext) => {
   let cNCMemory = context.getMemory()
   // 孵化
-  const spawnCreep = (body: BodyPartConstant[], name?: string, memory?: CreepMemory): ScreepsReturnCode => {
+  const spawnCreep = (body: BodyPartConstant[], name: string, memory?: CreepMemory): ScreepsReturnCode => {
     // spawn是否空闲
-    if (!context.lendSpawn() || !context.remandSpawn()) return ERR_BUSY
+    if (!context.lendSpawn()) return ERR_BUSY
     // 寻找可以用的spawn
+    if (!Game.rooms[context.room]) return ERR_NOT_FOUND
     const spawns = Game.rooms[context.room].find(FIND_MY_SPAWNS, {
       filter: (spawn) => spawn.spawning === null
     })
     // 没有空闲spawn
     if (spawns.length === 0) return ERR_NOT_FOUND
     // 孵化
-    return spawns[0].spawnCreep(body, name || generateCreepId(), { memory: memory })
+    return spawns[0].spawnCreep(body, name, { memory: memory })
   }
   // 孵化配置
   const addCreep = (...configs: CreepControl[]) => {
@@ -106,16 +103,18 @@ export const createCreepControler = (context: CreepControlerContext) => {
     if (cNCMemory.creep[context.room][0]) {
       const creep = cNCMemory.creep[context.room][0];
       if (context.lendSpawn()) {
-        const result = spawnCreep(context.getBodyPart(creep.role), creep.name, creep.data);
-        if (result === OK) cNCMemory.creep[context.room].shift();
-        // TODO 这里，有一个后台通知
-        else if (result !== ERR_NOT_ENOUGH_ENERGY) console.log("孵化失败，错误代码:", result);
+        // 命名
+        const name = context.getName(creep.role) + generateCreepId()
+        const result = spawnCreep(context.getBodyPart(creep.role), name, creep.data);
+        if (result === OK) {
+          cNCMemory.creep[context.room].shift()
+          // TODO 这里，有一个后台通知 
+        } else if (result !== ERR_NOT_ENOUGH_ENERGY) console.log("孵化失败，错误代码:", result)
       }
     }
   }
   return { spawnCreep, addCreep, delCreep, updateMemory, stateChange, run }
 }
-
 
 
 /**
