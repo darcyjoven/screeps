@@ -89,6 +89,10 @@ interface CreepMemory {
   role: string
   reSpawn: boolean
   ready: boolean
+  // 待命位置
+  isStandBy: boolean
+  // 工作位置,不允许对穿
+  isStand: boolean
   data: {}
   goCache: boolean
   move?: {
@@ -107,6 +111,13 @@ interface CreepMemory {
 interface FlagMemory { }
 interface PowerCreepMemory { }
 // 房间的内存管理 
+interface BuildStructure {
+  siteId: string
+  type: StructureConstant
+  pos: { x: number, y: number }
+}
+// 房间任务
+interface RoomTask { }
 interface RoomMemory {
   spawnList: string[] // 孵化清单
   // 路径缓存
@@ -121,7 +132,11 @@ interface RoomMemory {
   standBy?: {
     x: number,
     y: number
-  }
+  },
+  // 建筑工地相关
+  buildStructure?: BuildStructure
+  // 任务
+  task: RoomTask
 }
 interface SpawnMemory {
   belong: string | null
@@ -129,6 +144,7 @@ interface SpawnMemory {
 
 /**************** Room扩展属性 ********************/
 interface Room {
+  addAvoidPos(creepName: string, pos: RoomPosition): void
   serializePath(path: PathStep[]): string;
   deserializePath(path: string): PathStep[];
   sources: Source[]
@@ -164,7 +180,7 @@ interface Creep {
   giveTo(target: Structure, RESOURCE: ResourceConstant): ScreepsReturnCode;
   attackFlag(flag: string, healer: string): boolean;
   dismantleFlag(flag: string, healer: string): boolean;
-  healTo(creep: Creep): void;
+  healTo(creep: AnyCreep): void;
   serializeFarPath(positions: RoomPosition[]): string;
   dash(target: RoomPosition): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND;
   race(target: RoomPosition): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND;

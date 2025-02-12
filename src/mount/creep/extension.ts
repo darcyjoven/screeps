@@ -1,16 +1,52 @@
 import { dashRange, stanbyRange } from "setting/global"
-import { unserializePos } from "utils/path"
-import { serializePos, getOppositeDirection } from "utils/path"
+import { unserializePos, getSurroundingPos, serializePos, getOppositeDirection } from "utils/path"
 // creep 原型拓展
 export default class CreepExtension extends Creep {
   /**
    * 主要工作
    */
   public work(): void { }
+  public isStand(): void {
+    if (this.memory.isStand) return
+    this.memory.isStand = true
+    this.room.addAvoidPos(this.name, this.pos)
+  }
   /**
    * 指定位置待命
    */
-  public standBy(): void { }
+  public standBy(): void {
+    if (!this.room.memory.standBy) {
+      this.say('没有StandBy点')
+      return
+    }
+    if (this.memory.isStandBy) {
+      // 准备完成
+      if (this.pos.x !== this.room.memory.standBy.x || this.pos.y !== this.room.memory.standBy.y) this.say('standBy')
+      // 还未移动好，继续移动
+      else this.goTo(getSurroundingPos(this.room.memory.standBy.x, this.room.memory.standBy.y, this.room.name))
+    } else {
+      if (this.pos.x !== this.room.memory.standBy.x || this.pos.y !== this.room.memory.standBy.y) {
+        // 还未移动到standby点处
+        this.goTo(new RoomPosition(this.room.memory.standBy.x, this.room.memory.standBy.y, this.room.name))
+      } else {
+        // 到了移动到周围，并准备好
+        this.goTo(getSurroundingPos(this.room.memory.standBy.x, this.room.memory.standBy.y, this.room.name))
+        this.memory.ready = true
+        this.memory.isStandBy = true
+      }
+    }
+
+
+    if (!this.memory.isStandBy && (this.pos.x !== this.room.memory.standBy.x ||
+      this.pos.y !== this.room.memory.standBy.y)) {
+      // 还未移动到standby点处
+      this.goTo(new RoomPosition(this.room.memory.standBy.x, this.room.memory.standBy.y, this.room.name))
+    } else if (this.pos.x !== this.room.memory.standBy.x && this.pos.y !== this.room.memory.standBy.y) {
+      this.goTo(getSurroundingPos(this.room.memory.standBy.x, this.room.memory.standBy.y, this.room.name))
+      this.memory.ready = true
+      this.memory.isStandBy = true
+    }
+  }
   /**
    * 防御
    */
@@ -46,7 +82,7 @@ export default class CreepExtension extends Creep {
     // 没有memory 说明creep已经死亡,直接移动
     if (!this.memory) return OK
 
-    if (this.memory.standed){
+    if (this.memory.standed || this.memory.isStand) {
       this.say('||')
       return ERR_BUSY
     }
@@ -60,21 +96,92 @@ export default class CreepExtension extends Creep {
    * 升级本房间控制器
    */
   public upgrade(): ScreepsReturnCode {
-    return OK
+    if (!this.room.controller) return ERR_NOT_FOUND
+    const result = this.upgradeController(this.room.controller)
+
+    if (result === OK && !this.memory.standed) {
+      this.memory.standed = true
+      this.room.addAvoidPos(this.name, this.pos)
+    } else if (result == ERR_NOT_IN_RANGE) {
+      this.goTo(this.room.controller.pos)
+    }
+    return result
   }
   /**
    * 建筑工地
    */
   public buildStructure(): CreepActionReturnCode | ERR_NOT_ENOUGH_RESOURCES | ERR_RCL_NOT_ENOUGH | ERR_NOT_FOUND {
-    return OK
+    // 建筑工地
+    let target: ConstructionSite | undefined | null = undefined
+    // 检查是否有缓存
+    if (this.room.memory.buildStructure) {
+      target = Game.getObjectById<ConstructionSite>(this.room.memory.buildStructure.siteId as Id<ConstructionSite>)
+      // 找不到工地，可能是已经完成了
+      if (!target) {
+        const currentPos = new RoomPosition(
+          this.room.memory.buildStructure.pos.x,
+          this.room.memory.buildStructure.pos.y,
+          this.room.name,
+        )
+        // 需要查到相同类型建筑才可以
+        const struct = _.find(currentPos.lookFor(LOOK_STRUCTURES), (s) => {
+          return s.structureType === this.room.memory.buildStructure!.type
+        })
+        if (struct) {
+          // TODO 这里可以执行建筑完成回调
+        }
+        target = this.nextStructure()
+      }
+      // 没换成直接获取
+    } else target = this.nextStructure()
+    if (!target) return ERR_NOT_FOUND
+
+    // 开始建造
+    const buildResult = this.build(target)
+    if (buildResult !== OK && buildResult === ERR_NOT_IN_RANGE) this.goTo(target.pos)
+    return buildResult
+  }
+
+  public nextStructure(): ConstructionSite | undefined | null {
+    const targets = this.room.find(FIND_MY_CONSTRUCTION_SITES)
+    if (targets.length > 1) {
+      let target: ConstructionSite | undefined | null
+      // 优先建筑类型
+      for (const type of [STRUCTURE_SPAWN, StructureExtension]) {
+        target = targets.find(s => s.structureType === type)
+        if (target) break
+      }
+      // 找最近的工地
+      if (!target) target = this.pos.findClosestByRange(targets)
+      if (!target) return undefined
+
+      this.room.memory.buildStructure = {
+        siteId: target.id,
+        type: target.structureType,
+        pos: { x: target.pos.x, y: target.pos.y }
+      }
+      return target
+    } else {
+      delete this.room.memory.buildStructure
+      return undefined
+    }
   }
   /**
    * 从指定目标获取能量
    * @param target 目标结构
-   * @returns havest或withdraw 返回值
+   * @returns harvest或withdraw 返回值
    */
   public getFrom(target: Structure | Source): ScreepsReturnCode {
-    return OK
+    let result: ScreepsReturnCode
+    if (target instanceof Source) {
+      // harvest
+      result = this.harvest(target as Source)
+      if (result === OK) this.isStand()
+    } else {
+      result = this.withdraw(target as Structure, RESOURCE_ENERGY)
+    }
+    if (result === ERR_NOT_IN_RANGE) result = this.goTo(target.pos)
+    return result
   }
   /**
    * 将资源转义到指定建筑
@@ -82,7 +189,9 @@ export default class CreepExtension extends Creep {
    * @param RESOURCE 资源类型
    */
   public giveTo(target: Structure, RESOURCE: ResourceConstant): ScreepsReturnCode {
-    return OK
+    let result = this.transfer(target, RESOURCE)
+    if (result === ERR_NOT_IN_RANGE) this.goTo(target.pos)
+    return result
   }
   /**
    * 供给指定位置结构
@@ -104,7 +213,10 @@ export default class CreepExtension extends Creep {
    * 治疗指定的creep
    * @param creep 指定的creep
    */
-  public healTo(creep: Creep): void { }
+  public healTo(creep: AnyCreep): void {
+    let result = this.heal(creep)
+    if (result === ERR_NOT_IN_RANGE) this.goTo(creep.pos)
+  }
 
   /**
      * 压缩 PathFinder 返回的路径数组
