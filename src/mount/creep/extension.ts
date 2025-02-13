@@ -6,6 +6,9 @@ export default class CreepExtension extends Creep {
    * 主要工作
    */
   public work(): void { }
+  /**
+   * 占住当前位置，将当前地点加到房间禁止通行中
+   */
   public isStand(): void {
     if (this.memory.isStand) return
     this.memory.isStand = true
@@ -48,9 +51,40 @@ export default class CreepExtension extends Creep {
     }
   }
   /**
+   * 检查是否有敌人
+   */
+  public chkEnemy(): boolean {
+    if (!this.room._enemys) {
+      this.room._enemys = this.room.find(FIND_HOSTILE_CREEPS)
+    }
+    if (this.room._enemys.length > 0) {
+      this.memory.isStandBy = false
+      return true
+    } else return false
+  }
+  /**
    * 防御
    */
-  public defense(): void { }
+  public defense(): void {
+    if (!this.room._enemys) {
+      this.room._enemys = this.room.find(FIND_HOSTILE_CREEPS)
+    }
+    if (this.room._enemys.length <= 0) return
+
+    // 从缓存中获取敌人
+    const enemy = this.pos.findClosestByRange(this.room._enemys)
+    if (!enemy) return
+    this.say(`正在消灭 ${enemy.name}`)
+    this.goTo(enemy.pos)
+
+    if (this.getActiveBodyparts(RANGED_ATTACK) > 0) this.rangedAttack(enemy)
+    else this.attack(enemy)
+
+    // 如果有可用 HEAL 身体并且掉血了则自我治疗
+    if (this.getActiveBodyparts(HEAL) > 0 && this.hits < this.hitsMax) {
+      this.heal(this)
+    }
+  }
   /**
    * 向指定方向对穿
    * @param direction 方向

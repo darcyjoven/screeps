@@ -151,6 +151,8 @@ interface Room {
   sourceContainers: StructureContainer[]
   getAvoidPos(): { [creepName: string]: string }
   getAvailableSource(): StructureTerminal | StructureStorage | StructureContainer | Source
+  // 敌人缓存
+  _enemys:Creep[]
 }
 
 type Colors = 'green' | 'blue' | 'yellow' | 'red'
