@@ -106,6 +106,8 @@ interface CreepMemory {
     // 缓存路径的目标，该目标发生变化时刷新路径, 形如"14/4E14S1"
     targetPos?: string
   }
+  // 是否有工作
+  working:boolean
 }
 
 interface FlagMemory { }
@@ -145,14 +147,16 @@ interface SpawnMemory {
 /**************** Room扩展属性 ********************/
 interface Room {
   addAvoidPos(creepName: string, pos: RoomPosition): void
+  rmAvoidPos(creepName: string): void
   serializePath(path: PathStep[]): string;
   deserializePath(path: string): PathStep[];
   sources: Source[]
   sourceContainers: StructureContainer[]
   getAvoidPos(): { [creepName: string]: string }
   getAvailableSource(): StructureTerminal | StructureStorage | StructureContainer | Source
+  log(content: string, instanceName: string, color: Colors, notify: boolean): void
   // 敌人缓存
-  _enemys:Creep[]
+  _enemys: Creep[]
 }
 
 type Colors = 'green' | 'blue' | 'yellow' | 'red'
@@ -170,25 +174,31 @@ interface RoomPosition {
 /**************** Creep ********************/
 interface Creep {
   // 是否允许对穿
-  _move(target: DirectionConstant | Creep): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND
   work(): void;
+  isStand(): void;
   standBy(): void;
+  chkEnemy(): boolean;
   defense(): void;
   cross(direction: DirectionConstant): OK | ERR_BUSY | ERR_NOT_FOUND;
   requireCross(direction: DirectionConstant): OK | ERR_BUSY;
   upgrade(): ScreepsReturnCode;
   buildStructure(): CreepActionReturnCode | ERR_NOT_ENOUGH_RESOURCES | ERR_RCL_NOT_ENOUGH | ERR_NOT_FOUND;
+  nextStructure(): ConstructionSite | undefined | null;
   getFrom(target: Structure | Source): ScreepsReturnCode;
   giveTo(target: Structure, RESOURCE: ResourceConstant): ScreepsReturnCode;
-  attackFlag(flag: string, healer: string): boolean;
-  dismantleFlag(flag: string, healer: string): boolean;
+  attackFlag(flag: string, healerName?: string): boolean;
+  dismantleFlag(flag: string, healerName?: string): boolean;
+  canMoveWith(creep: AnyCreep): boolean;
   healTo(creep: AnyCreep): void;
   serializeFarPath(positions: RoomPosition[]): string;
+  serializePath(positions: PathStep[]): string;
+  _move(target: DirectionConstant): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND;
   dash(target: RoomPosition): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND;
   race(target: RoomPosition): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND;
   marathon(target: RoomPosition): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND;
   goTo(target: RoomPosition): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND;
-  goByCache(): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND
+  goByCache(): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND;
+  log(content: string, color?: Colors, notify?: boolean): void;
 }
 
 /**************** terminal ********************/
