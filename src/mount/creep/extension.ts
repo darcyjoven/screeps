@@ -1,11 +1,55 @@
 import { dashRange, stanbyRange } from "setting/global"
 import { unserializePos, getSurroundingPos, serializePos, getOppositeDirection } from "utils/path"
+import roles from "creep"
 // creep 原型拓展
 export default class CreepExtension extends Creep {
   /**
    * 主要工作
    */
-  public work(): void { }
+  public work(): void {
+    // 检查角色正确否
+    if (!(this.memory.role in roles)) {
+      this.log(`找不到对应的 creepConfig`, 'yellow')
+      this.say(`凉了，role:${this.memory.role}`)
+      return
+    }
+    // 孵化中
+    if (this.spawning) {
+      // if (this.ticksToLive === CREEP_LIFE_TIME) this._id = this.id // 解决 this creep not exist 问题
+      return
+    }
+
+    // 快死的时候处理
+    if (this.ticksToLive && this.ticksToLive <= 3) {
+      // 释放出禁止通行点
+      if (this.memory.isStand) this.room.rmAvoidPos(this.name)
+    }
+    // 获取creep的配置
+    const creepConfig: CreepCycle = roles[this.memory.role as CreepRole](this.memory.data)
+
+    // 还未准备好
+    if (!this.memory.ready) {
+      if (creepConfig.prepare) this.memory.ready = creepConfig.prepare(this)
+      else this.memory.ready = true
+    }
+    // 还未准备就继续下一个tick
+    if (!this.memory.ready) return
+    // 获取是否有工作
+    const working = creepConfig.source ? this.memory.working : true
+    let stateChange = false
+    // 执行阶段
+    if (working) if (creepConfig.target && creepConfig.target(this)) stateChange = true
+    else if (creepConfig.source && creepConfig.source(this)) stateChange = true
+
+    // 状态变化了就释放工作位置
+    if (stateChange) {
+      this.memory.working = !this.memory.working
+      if (this.memory.isStand) {
+        this.room.rmAvoidPos(this.name)
+        this.memory.isStand = false
+      }
+    }
+  }
   /**
    * 占住当前位置，将当前地点加到房间禁止通行中
    */
@@ -175,7 +219,9 @@ export default class CreepExtension extends Creep {
     if (buildResult !== OK && buildResult === ERR_NOT_IN_RANGE) this.goTo(target.pos)
     return buildResult
   }
-
+  /**
+   * 寻找下一个建筑工地
+   */
   public nextStructure(): ConstructionSite | undefined | null {
     const targets = this.room.find(FIND_MY_CONSTRUCTION_SITES)
     if (targets.length > 1) {
@@ -230,18 +276,70 @@ export default class CreepExtension extends Creep {
   /**
    * 供给指定位置结构
    * @param flag flag名称
-   * @param healer 治疗者名称
+   * @param healerName 治疗者名称
    */
-  public attackFlag(flag: string, healer: string): boolean {
+  public attackFlag(flag: string, healerName: string = ''): boolean {
+    this.say('attack', true)
+    // 找到攻击flag
+    const attackFlag = Game.flags[flag]
+    if (!attackFlag) return false
+
+    // 不在同一个房间，先移动过去
+    if (!attackFlag.room || attackFlag.room && this.room.name !== attackFlag.room.name) {
+      this.goTo(attackFlag.pos)
+      return true
+    }
+
+    // 如果在同一个房间
+    // 优先供给creep
+    let target: Creep | PowerCreep | Structure | Flag
+    const enemys = attackFlag.pos.findInRange(FIND_HOSTILE_CREEPS, 2)
+    if (enemys.length > 0) target = enemys[0]
+    else {
+      // 寻找structure
+      const structures = attackFlag.pos.lookFor(LOOK_STRUCTURES)
+      if (structures.length === 0) {
+        this.say('no enemy')
+        target = attackFlag
+      } else target = structures[0]
+    }
+    this.goTo(target.pos)
+    this.attack(target as AnyCreep | Structure)
     return true
   }
   /**
    * 拆除指定位置建筑
    * @param flag flag名称 
-   * @param healer 治疗者 
+   * @param healerName 治疗者 
    */
-  public dismantleFlag(flag: string, healer: string): boolean {
+  public dismantleFlag(flag: string, healerName: string = ''): boolean {
+    // 获取flag
+    const attackFlag = Game.flags[flag]
+    if (!attackFlag) return false
+    // 治疗单位
+    const healer = Game.creeps[healerName]
+
+    // 不在同一个房间，先移动过去
+    if (!attackFlag.room || attackFlag.room && this.room.name !== attackFlag.room.name) {
+      if (!this.canMoveWith(healer)) return true
+      this.goTo(attackFlag.pos)
+      return true
+    }
+
+    // 如果flag在同一个房间
+    const structures = attackFlag.pos.lookFor(LOOK_STRUCTURES)
+    if (structures.length === 0) this.say('找不到建筑')
+
+    if (this.canMoveWith(healer)) this.goTo(attackFlag.pos)
+    this.dismantle(structures[0])
     return true
+  }
+
+  /**
+   * 两个creep一起移动
+   */
+  public canMoveWith(creep: AnyCreep): boolean {
+    return (creep && this.pos.isNearTo(creep) && this.fatigue === 0)
   }
   /**
    * 治疗指定的creep
@@ -453,5 +551,8 @@ export default class CreepExtension extends Creep {
     const goResult = this._move(next)
     if (goResult === OK) this.memory.move.index++
     return goResult
+  }
+  public log(content: string, color: Colors = 'blue', notify: boolean = false) {
+    this.room.log(content, this.name, color, notify)
   }
 }

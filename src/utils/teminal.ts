@@ -166,3 +166,42 @@ const apiStyle = function () {
 
     return style.replace(/\n/g, '')
 }
+
+/**
+ * 后台显示日志,或发送到邮箱
+ * @param content 日志内容
+ * @param prefixes 日志的前缀
+ * @param color 日志的颜色
+ * @param notify 是否邮件通知
+ */
+export function log(content: string, prefixes: string[] = [],
+    color: Colors = 'blue', notify: boolean = false) {
+    // 前缀
+    let prefix = prefixes.length > 0 ? `【${prefixes.join(' ')}】 ` : ''
+    // 颜色
+    prefix = colorful(prefix, color, true)
+
+    const logContent = `${prefix}${content}`
+    console.log(logContent)
+    if (notify) Game.notify(logContent)
+}
+
+/**
+ * 给房间内添加跳转链接
+ * 
+ * @param roomName 添加调整链接的房间名
+ * @returns 打印在控制台上后可以点击跳转的房间名
+ */
+export function createRoomLink(roomName: string): string {
+    return createLink(roomName, `https://screeps.com/a/#!/room/${Game.shard.name}/${roomName}`, false)
+}
+
+/**
+ * 生成控制台链接
+ * @param content 要显示的内容
+ * @param url 要跳转到的 url
+ * @param newTab 是否在新标签页打开
+ */
+export function createLink(content: string, url: string, newTab: boolean = true): string {
+    return `<a href="${url}" target="${newTab ? '_blank' : '_self'}">${content}</a>`
+}
