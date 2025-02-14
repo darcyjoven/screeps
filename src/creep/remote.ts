@@ -1,13 +1,25 @@
 export const roles: {
     [role in RemoteRole]: (data: CreepData) => CreepCycle
 } = {
-    RemoteHarvester: function (data: CreepData): CreepCycle {
-        throw new Error("Function not implemented.");
-    },
-    RemoteHauler: function (data: CreepData): CreepCycle {
-        throw new Error("Function not implemented.");
-    },
-    RemoteDefender: function (data: CreepData): CreepCycle {
-        throw new Error("Function not implemented.");
-    }
+    RemoteHarvester: ((data: CreepData): CreepCycle => ({
+        prepare: (creep: Creep): boolean => { return true },
+        target: (creep: Creep): boolean => { return true },
+        source: (creep: Creep): boolean => { return true },
+        isNeed: (room: Room, creepName: string, preMemory: CreepMemory): boolean => { return true },
+        bodys: "Collector"
+    })) as (data: CreepData) => CreepCycle,
+    RemoteHauler:((data: CreepData): CreepCycle => ({
+        prepare: (creep: Creep): boolean => { return true },
+        target: (creep: Creep): boolean => { return true },
+        source: (creep: Creep): boolean => { return true },
+        isNeed: (room: Room, creepName: string, preMemory: CreepMemory): boolean => { return true },
+        bodys: "Collector"
+    })) as (data: CreepData) => CreepCycle,
+    RemoteDefender:((data: CreepData): CreepCycle => ({
+        prepare: (creep: Creep): boolean => { return true },
+        target: (creep: Creep): boolean => { return true },
+        source: (creep: Creep): boolean => { return true },
+        isNeed: (room: Room, creepName: string, preMemory: CreepMemory): boolean => { return true },
+        bodys: "Collector"
+    })) as (data: CreepData) => CreepCycle,
 }

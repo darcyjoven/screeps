@@ -51,34 +51,35 @@ type CreepWork = {
   [role in CreepRole]: (data: CreepData) => CreepCycle
 }
 /**************** CreepData ********************/
-interface EmptyData { }
-interface HarvesterData {
+type EmptyData = {}
+type HarvesterData = {
   sourceId: string
   targetId: string
 }
-interface WorkerData {
-  // sourceId:string
+type WorkerData = {
+  sourceId: string
   targetId: string
 }
-interface ProcessorData {
+type ProcessorData = {
   x: number
   y: number
 }
-interface RemoteHarvesterData {
+type RemoteHarvesterData = {
   sourceFlagName: string
   targetId: string
   spawnRoom: string
 }
-interface HealerData {
+type HealerData = {
   targetFlagName: string
   reSpawn: boolean
 }
-type CreepData = EmptyData | WorkerData | ProcessorData | RemoteHarvesterData |
+type CreepData = EmptyData | HarvesterData | WorkerData | ProcessorData | RemoteHarvesterData |
   HealerData
 
 /**************** 内存管理 ********************/
 interface Memory {
   bypassRooms: string[]
+  shareTask: ShareTask[]
 }
 // Creep的内存管理
 interface CreepMemory {
@@ -93,7 +94,7 @@ interface CreepMemory {
   isStandBy: boolean
   // 工作位置,不允许对穿
   isStand: boolean
-  data: {}
+  data: CreepData
   goCache: boolean
   move?: {
     far: boolean
@@ -107,7 +108,11 @@ interface CreepMemory {
     targetPos?: string
   }
   // 是否有工作
-  working:boolean
+  working: boolean
+  // 建筑工特有，当前缓存的建筑工地
+  constructionSiteId?: string
+  // 要刷的墙的ID
+  fillWallId?: string
 }
 
 interface FlagMemory { }
@@ -118,8 +123,67 @@ interface BuildStructure {
   type: StructureConstant
   pos: { x: number, y: number }
 }
+type CenterStructures = STRUCTURE_STORAGE | STRUCTURE_TERMINAL | STRUCTURE_FACTORY | 'centerLink'
+// 中央物流任务
+type CenterTask = {
+  // 任务提交者，中央建筑或者手动推送
+  submit: CenterStructures | number
+  source: CenterStructures
+  target: CenterStructures
+  resouce: ResourceConstant
+  amount: number
+}
+// 房间物流任务
+type TransferTask = ExtensionFill | TowerFill | NukerFill | PowerSpawnFill |
+  LabInFill | LabOut | BoostGetResource | BoostGetEnergy | BootClear
+
+interface ExtensionFill {
+  type: string
+}
+interface TowerFill extends ExtensionFill {
+  id: string
+}
+interface NukerFill extends TowerFill {
+  resouce: ResourceConstant
+}
+interface PowerSpawnFill extends NukerFill { }
+
+interface LabInFill extends ExtensionFill {
+  resource: {
+    id: string
+    type: ResourceConstant
+    amount: number
+  }[]
+}
+interface LabOut extends ExtensionFill {
+  resource: ResourceConstant
+}
+interface BoostGetResource extends ExtensionFill { }
+interface BoostGetEnergy extends ExtensionFill { }
+interface BootClear extends ExtensionFill { }
+
+
+// 能量请求任务
+type PowerTask = PowerConstant
+// 孵化任务
+type SpawnTask = CreepRole
+
+// 不同房间共享任务
+type ShareTask = {
+  submit: Structure | number
+  target: Structure
+  resource: ResourceConstant
+  amount: number
+}
+
+
 // 房间任务
-interface RoomTask { }
+type RoomTask = {
+  center?: CenterTask[]
+  transfer?: TransferTask[]
+  power?: PowerTask[]
+  spawn?: SpawnTask[]
+}
 interface RoomMemory {
   spawnList: string[] // 孵化清单
   // 路径缓存
@@ -138,7 +202,7 @@ interface RoomMemory {
   // 建筑工地相关
   buildStructure?: BuildStructure
   // 任务
-  task: RoomTask
+  task?: RoomTask
 }
 interface SpawnMemory {
   belong: string | null
@@ -157,6 +221,7 @@ interface Room {
   log(content: string, instanceName: string, color: Colors, notify: boolean): void
   // 敌人缓存
   _enemys: Creep[]
+  registerContainer(structure: StructureContainer): void
 }
 
 type Colors = 'green' | 'blue' | 'yellow' | 'red'
@@ -184,6 +249,7 @@ interface Creep {
   upgrade(): ScreepsReturnCode;
   buildStructure(): CreepActionReturnCode | ERR_NOT_ENOUGH_RESOURCES | ERR_RCL_NOT_ENOUGH | ERR_NOT_FOUND;
   nextStructure(): ConstructionSite | undefined | null;
+  fillWall(): OK | OK | ERR_NOT_FOUND
   getFrom(target: Structure | Source): ScreepsReturnCode;
   giveTo(target: Structure, RESOURCE: ResourceConstant): ScreepsReturnCode;
   attackFlag(flag: string, healerName?: string): boolean;

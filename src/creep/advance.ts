@@ -1,10 +1,18 @@
 export const roles: {
     [role in AdvanceRole]: (data: CreepData) => CreepCycle
 } = {
-    Claimer: function (data: CreepData): CreepCycle {
-        throw new Error("Function not implemented.");
-    },
-    Dismantler: function (data: CreepData): CreepCycle {
-        throw new Error("Function not implemented.");
-    }
+    Claimer: ((data: CreepData): CreepCycle => ({
+        prepare: (creep: Creep): boolean => { return true },
+        target: (creep: Creep): boolean => { return true },
+        source: (creep: Creep): boolean => { return true },
+        isNeed: (room: Room, creepName: string, preMemory: CreepMemory): boolean => { return true },
+        bodys: "Collector"
+    })) as (data: CreepData) => CreepCycle,
+    Dismantler: ((data: CreepData): CreepCycle => ({
+        prepare: (creep: Creep): boolean => { return true },
+        target: (creep: Creep): boolean => { return true },
+        source: (creep: Creep): boolean => { return true },
+        isNeed: (room: Room, creepName: string, preMemory: CreepMemory): boolean => { return true },
+        bodys: "Collector"
+    })) as (data: CreepData) => CreepCycle,
 }

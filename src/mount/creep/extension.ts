@@ -1,4 +1,4 @@
-import { dashRange, stanbyRange } from "setting/global"
+import { dashRange, stanbyRange, minWallHits } from "setting/global"
 import { unserializePos, getSurroundingPos, serializePos, getOppositeDirection } from "utils/path"
 import roles from "creep"
 // creep 原型拓展
@@ -245,6 +245,20 @@ export default class CreepExtension extends Creep {
       delete this.room.memory.buildStructure
       return undefined
     }
+  }
+  /**
+    * 稳定新墙
+    * 会把内存中 fillWallId 标注的墙声明值刷到定值以上
+    */
+  public fillWall(): OK | OK | ERR_NOT_FOUND {
+    const wall = Game.getObjectById(this.memory.fillWallId as Id<StructureWall | StructureRampart>)
+    if (!wall) return ERR_NOT_FOUND
+
+    if (wall.hits < minWallHits) {
+      if (this.repair(wall) === ERR_NOT_IN_RANGE) this.goTo(wall.pos)
+    }else delete this.memory.fillWallId
+    
+    return OK
   }
   /**
    * 从指定目标获取能量
