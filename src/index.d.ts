@@ -296,3 +296,7 @@ interface ApiDescribe {
 
 }
 
+/*********************** Global 全局声明 ************************/
+
+declare function addShareTask(task: ShareTask, emergency: boolean): OK | ERR_NAME_EXISTS | ERR_INVALID_TARGET;
+declare function nextShareTask(): ShareTask | undefined;

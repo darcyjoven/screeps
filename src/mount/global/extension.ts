@@ -4,7 +4,7 @@ export default {
      * 
      * @param id 游戏对象的 id
      */
-    get(id:string):any{
+    get(id: string): any {
         return Game.getObjectById(id)
     },
 
@@ -33,4 +33,22 @@ export default {
         log += `\n共计: ${total}`
         return log
     },
+    /**
+     * 增加一个跨房间任务
+     */
+    addShareTask(task: ShareTask, emergency: boolean = false): OK | ERR_NAME_EXISTS | ERR_INVALID_TARGET {
+        if (!Memory.shareTask) Memory.shareTask = [task]
+        else emergency ? Memory.shareTask.unshift(task) : Memory.shareTask.push(task)
+        return OK
+    },
+    /**
+     * 获取下一个跨房间任务
+     */
+    nextShareTask(): ShareTask | undefined {
+        if (!Memory.shareTask) return
+        if (Memory.shareTask.length === 0) return
+        const result = Memory.shareTask[0]
+        Memory.shareTask.unshift()
+        return result
+    }
 }
