@@ -17,7 +17,7 @@ export declare interface CNCMemory {
     currentState: OperationState
   }
 }
-export declare interface CreepControlerContext {
+export declare interface CreepControllerContext {
   // 房间名称
   room: string
   // 获取当前Memory
@@ -38,6 +38,16 @@ export declare interface CreepControlerContext {
   remandSpawn: () => boolean
 }
 
+export declare interface CreepController {
+  spawnCreep: (body: BodyPartConstant[], name: string, memory?: CreepMemory) => ScreepsReturnCode;
+  addCreep: (...configs: CreepControl[]) => void;
+  delCreep: (creep: Creep, cnt: number) => boolean;
+  updateMemory: () => any;
+  stateChange: (state: OperationState) => any; // Replace 'any' with the actual return type if known
+  run: () => void;
+}
+
+
 const generateCreepId = (): string => Math.random().toString(36).substring(2, 5);
 
 // 阶段性配置
@@ -56,7 +66,7 @@ const creepControls: Record<OperationState, CreepControl[]> = {
  * @param context 需要的参数
  * @returns 暴露出去可以用的内容
  */
-export const createCreepControler = (context: CreepControlerContext) => {
+export const createCreepController = (context: CreepControllerContext): CreepController => {
   let cNCMemory = context.getMemory()
   // 孵化
   const spawnCreep = (body: BodyPartConstant[], name: string, memory?: CreepMemory): ScreepsReturnCode => {

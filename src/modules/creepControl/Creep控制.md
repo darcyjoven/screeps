@@ -1,6 +1,6 @@
 # creep 控制主要功能
 
-1. 运维规划，不同controler等级进行不同数量的creep规划
+1. 运维规划，不同controller等级进行不同数量的creep规划
 2. 死亡收集，当creep死亡时通知到模块，判断是否进行重新孵化
 3. 孵化任意creep，将孵化加入队列，允许插队
 4. 锁定房间spawn，空闲释放spawn
@@ -27,12 +27,12 @@
 
 ## 阶段2 container 建造完成
 
-- 孵化 upgrader \* 2 进行controler升级
+- 孵化 upgrader \* 2 进行controller升级
 - harvester \* 2 filler \* 2 upgrader\*4
 
 ## 阶段三 storage 修建完成
 
-- controler 等级到4时，自动建立storage 工地
+- controller 等级到4时，自动建立storage 工地
 - filler \* 2 向 strage 中填充能量
 - manager 负责取出能量到需要的地方
 
