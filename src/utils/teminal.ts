@@ -205,3 +205,10 @@ export function createRoomLink(roomName: string): string {
 export function createLink(content: string, url: string, newTab: boolean = true): string {
     return `<a href="${url}" target="${newTab ? '_blank' : '_self'}">${content}</a>`
 }
+/**
+ * 输出debug信息
+ */
+export function info(...content: any[]): void {
+    if (!global.isDebug) return
+    console.log(JSON.stringify(content))
+}
