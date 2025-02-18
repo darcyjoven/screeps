@@ -7,4 +7,7 @@ export default class RoomExtension extends creepControl {
         this.creepNumberControl()
         this.clearCreepMemory()
     }
+    public registerContainer(structure: StructureContainer): void{
+        if (!this.sourceContainers) this.sourceContainers =[structure]
+    }
 }

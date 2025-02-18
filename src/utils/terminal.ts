@@ -208,16 +208,22 @@ export function createLink(content: string, url: string, newTab: boolean = true)
 
 const infoShow: Record<string, boolean> = {
     'creepNumberControl': false,
+    'creepWork': false,
+    'creepPrepare': false,
+    'creepSource': true,
+    'harvester': true,
+    'roomTask': false,
+    'spawn': false,
+    'main': false,
+    'creepMount': false,
+    'goTo': false,
+    'dash': false,
 }
 /**
  * 输出debug信息
  */
 export function info(module: string[], ...content: any[]): void {
     if (!global.isDebug) return
-    module.forEach(m => {
-        if (infoShow[m]) {
-            console.log(JSON.stringify(content))
-            return
-        }
-    })
+    if (_.some(module, m => !infoShow[m])) return
+    console.log(colorful(JSON.stringify(module), 'green', true), JSON.stringify(content))
 }

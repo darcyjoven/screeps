@@ -23,6 +23,7 @@ export const roles: {
         target = Game.getObjectById<StructureContainer | Source | ConstructionSite>(data.targetId as Id<StructureContainer | Source | ConstructionSite>)
       }
       let source = Game.getObjectById<Source>(data.sourceId as Id<Source>)
+      // 没有配置资料，要自行搜索
       if (!source) {
         const sources = creep.room.find(FIND_SOURCES, {
           filter: s => {
@@ -42,6 +43,10 @@ export const roles: {
           if (!creep.room.memory.structure.source) creep.room.memory.structure.source = { [source.id]: { belong: creep.name } }
           creep.room.memory.structure.source[source.id] = { belong: creep.name }
         }
+      }
+      if (!data.sourceId && source){
+        data.sourceId = source.id
+        creep.memory.data = data
       }
       // 没有缓存或者缓存失效要重新获取
       if (!target && source) {
@@ -71,7 +76,7 @@ export const roles: {
       // 设置移动范围并进行移动（source 走到附近、container 和工地就走到它上面）
       const range = target instanceof Source ? 1 : 0
       creep.goTo(target.pos)
-
+      info(['creepPrepare', 'harvester'], '到达了位置', 'position', target.pos, range)
       // 抵达位置了就准备完成
       if (creep.pos.inRangeTo(target.pos, range)) return true
       return false
@@ -80,6 +85,8 @@ export const roles: {
     // 在这个阶段中，targetId 仅指 container
     source: (creep: Creep) => {
       creep.say('stand')
+      info(['creepSource', 'harvester'], 'source 阶段', '---')
+      info(['creepSource', 'harvester'], '能量', creep.store[RESOURCE_ENERGY])
 
       // 没有能量就进行采集，因为是维护阶段，所以允许采集一下工作一下
       if (creep.store[RESOURCE_ENERGY] <= 0) {
@@ -90,7 +97,7 @@ export const roles: {
 
       // 获取 prepare 阶段中保存的 targetId
       let target = Game.getObjectById((creep.memory.data as HarvesterData).targetId as Id<StructureContainer | Source>)
-
+      info(['creepSource', 'harvester'], 'target工地', target?.id)
       // 存在 container，把血量修满
       if (target && target instanceof StructureContainer) {
         creep.repair(target)
@@ -103,8 +110,11 @@ export const roles: {
       if (!creep.memory.constructionSiteId) creep.pos.createConstructionSite(STRUCTURE_CONTAINER)
       else constructionSite = Game.getObjectById(creep.memory.constructionSiteId as Id<ConstructionSite>)
 
+      info(['creepSource', 'harvester'], '新建工地', constructionSite?.id)
+
       // 没找到工地缓存或者工地没了，重新搜索
       if (!constructionSite) constructionSite = creep.pos.lookFor(LOOK_CONSTRUCTION_SITES).find(s => s.structureType === STRUCTURE_CONTAINER)
+      info(['creepSource', 'harvester'], '搜索工地', constructionSite?.id)
 
       // 还没找到就说明有可能工地已经建好了，进行搜索
       if (!constructionSite) {
@@ -120,6 +130,7 @@ export const roles: {
         return false
         // 找到了就缓存 id
       } else creep.memory.constructionSiteId = constructionSite.id
+      info(['creepSource', 'harvester'], '建设工地', constructionSite?.id)
       return (creep.build(constructionSite) === OK)
     },
     // 采集阶段会无脑采集，过量的能量会掉在 container 上然后被接住存起来

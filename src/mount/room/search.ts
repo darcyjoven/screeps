@@ -11,10 +11,12 @@ export default class SearchExtension extends LayoutExtension {
         if (this.terminal && this.terminal.store[RESOURCE_ENERGY] > 10000) return this.terminal
         if (this.storage && this.storage.store[RESOURCE_ENERGY] > 100000) return this.storage
         // 如果有 sourceConainer 的话就挑个多的
-        if (this.sourceContainers.length > 0) {
+        if (this.sourceContainers && this.sourceContainers.length > 0) {
             return _.maxBy(this.sourceContainers, container => container.store[RESOURCE_ENERGY]) as StructureContainer
         }
-
+        if (!this.sources || this.sources.length === 0) {
+            this.sources = this.find(FIND_SOURCES)
+        }
         // 没有就选边上有空位的 source
         return this.sources.find(source => {
             const freeCount = source.pos.getFreeSpace().length

@@ -66,96 +66,106 @@ export default class CreepControl extends ConfigExtension {
         }
         toDel.forEach(name => {
             delete Memory.creeps[name]
-            this.log(`清除死亡creep[${name}]的内存`,'creep','red')
+            this.log(`清除死亡creep[${name}]的内存`, 'creep', 'red')
         })
     }
 }
 
-    const stateControls: Record<OperationState, CreepRole[]> = {
-        claim: [
-            'Harvester',
-            'Harvester',
-            'Builder',
-        ],
-        container: [
-            'Harvester',
-            'Harvester',
-            'Builder',
-            'Filler',
-            'Filler',
-            'Upgrader',
-            'Upgrader',
-            'Upgrader',
-            'Upgrader',
-        ],
-        storage: [
-            'Harvester',
-            'Harvester',
-            'Builder',
-            'Filler',
-            'Filler',
-            'Upgrader',
-            'Upgrader',
-            'Upgrader',
-            'Upgrader',
-            'Upgrader',
-            'Upgrader',
-            'Manager'
-        ],
-        link: [
-            'Harvester',
-            'Harvester',
-            'Builder',
-            'Filler',
-            'Filler',
-            'Filler',
-            'Upgrader',
-            'Upgrader',
-            'Upgrader',
-            'Upgrader',
-            'Upgrader',
-            'Upgrader',
-            'Upgrader',
-            'Upgrader',
-            'Manager',
-            'Processor'
-        ]
-    }
+const stateControls: Record<OperationState, CreepRole[]> = {
+    claim: [
+        'Harvester',
+        'Harvester',
+        'Builder',
+    ],
+    container: [
+        'Harvester',
+        'Harvester',
+        'Builder',
+        'Filler',
+        'Filler',
+        'Upgrader',
+        'Upgrader',
+        'Upgrader',
+        'Upgrader',
+    ],
+    storage: [
+        'Harvester',
+        'Harvester',
+        'Builder',
+        'Filler',
+        'Filler',
+        'Upgrader',
+        'Upgrader',
+        'Upgrader',
+        'Upgrader',
+        'Upgrader',
+        'Upgrader',
+        'Manager'
+    ],
+    link: [
+        'Harvester',
+        'Harvester',
+        'Builder',
+        'Filler',
+        'Filler',
+        'Filler',
+        'Upgrader',
+        'Upgrader',
+        'Upgrader',
+        'Upgrader',
+        'Upgrader',
+        'Upgrader',
+        'Upgrader',
+        'Upgrader',
+        'Manager',
+        'Processor'
+    ]
+}
 
-    /**
-     * 判断房间的运维阶段
-     * @param room 
-     * @returns 
-     */
-    const getCurrentState = (room: Room): OperationState => {
-        return 'claim'
+/**
+ * 判断房间的运维阶段
+ * @param room 
+ * @returns 
+ */
+const getCurrentState = (room: Room): OperationState => {
+    return 'claim'
+}
+/**
+ * 从this.memory.task.spawn,creep,运维配置
+ * 
+ * 获取有哪些creep还未进任务清单
+ */
+const getToSpawn = (tasks: SpawnTask[], creeps: Creep[], state: OperationState): CreepRole[] => {
+    // 复制数组，避免修改外部数据
+    let configsCopy: CreepRole[] = []
+    let toSpawn: Record<CreepRole, number> = {
+        Harvester: 0,
+        Worker: 0,
+        Hauler: 0,
+        Collector: 0,
+        Upgrader: 0,
+        Builder: 0,
+        Filler: 0,
+        Processor: 0,
+        Manager: 0,
+        Defender: 0,
+        Ranged: 0,
+        Healer: 0,
+        RemoteHarvester: 0,
+        RemoteHauler: 0,
+        RemoteDefender: 0,
+        Claimer: 0,
+        Dismantler: 0
     }
-    /**
-     * 从this.memory.task.spawn,creep,运维配置
-     * 
-     * 获取有哪些creep还未进任务清单
-     */
-    const getToSpawn = (tasks: SpawnTask[], creeps: Creep[], state: OperationState): CreepRole[] => {
-        // 复制数组，避免修改外部数据
-        let configsCopy = [...stateControls[state]]
-        let creepsCopy = [...creeps]
-        let tasksCopy = [...tasks]
+    // 配置数量 
+    stateControls[state].forEach(role => toSpawn[role]++)
+    creeps.forEach(creep => toSpawn[creep.memory.role as CreepRole]--)
+    tasks.forEach(task => toSpawn[task]--)
 
-        outer: for (let i = configsCopy.length - 1; i >= 0; i--) {
-            for (let j = creepsCopy.length - 1; j >= 0; j--) {
-                if (creepsCopy[j].memory.role === configsCopy[i]) {
-                    configsCopy.splice(i, 1)
-                    creepsCopy.splice(j, 1)
-                    continue outer
-                }
-            }
-            for (let k = tasksCopy.length - 1; k >= 0; k--) {
-                if (tasksCopy[k] === configsCopy[i]) {
-                    configsCopy.splice(i, 1)
-                    tasksCopy.splice(k, 1)
-                    continue outer
-                }
-            }
+    for (const role in toSpawn) {
+        for (let i = 0; i < toSpawn[role as CreepRole]; i++) {
+            configsCopy.push(role as CreepRole)
         }
-        return configsCopy
-    } 
+    }
+    return configsCopy
+} 
