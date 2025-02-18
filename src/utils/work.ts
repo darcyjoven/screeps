@@ -1,3 +1,4 @@
+import { info } from "./teminal"
 /**
  * 所有单位开始工作
  * @param workders 
@@ -5,9 +6,10 @@
 export const work = (...hasMaps: object[]): void => {
     hasMaps.forEach((obj, index) => {
         let startCost = Game.cpu.getUsed()
-
         Object.values(obj).forEach(item => {
-            if (item.work) item.work()
+            if (item.work) {
+                item.work()
+            }
         })
 
     })
