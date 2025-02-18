@@ -1,11 +1,16 @@
+import ConfigExtension from "./config";
+import RoomExtension from "./extension";
 import LayoutExtension from "./layout";
 import SearchExtension from "./search";
 import TaskExtension from "./task";
-import ConfigExtension from "./config";
-import RoomExtension from "./extension";
 import { assignPrototype } from "utils/mount";
+import { info } from "utils/teminal";
 
-const plugins = [ConfigExtension, LayoutExtension, SearchExtension, TaskExtension, RoomExtension]
-
-export default () => plugins.forEach(plugin => { assignPrototype(Room, plugin) })
+export default () => { 
+    assignPrototype(Room, ConfigExtension)
+    assignPrototype(Room, RoomExtension)
+    assignPrototype(Room, LayoutExtension)
+    assignPrototype(Room, SearchExtension)
+    assignPrototype(Room, TaskExtension) 
+}
 

@@ -36,9 +36,9 @@ export default {
     /**
      * 增加一个跨房间任务
      */
-    addShareTask(task: ShareTask, emergency: boolean = false): OK | ERR_NAME_EXISTS | ERR_INVALID_TARGET {
-        if (!Memory.shareTask) Memory.shareTask = [task]
-        else emergency ? Memory.shareTask.unshift(task) : Memory.shareTask.push(task)
+    addShareTask(emergency: boolean = false, ...task: ShareTask[]): OK | ERR_NAME_EXISTS | ERR_INVALID_TARGET {
+        if (!Memory.shareTask) Memory.shareTask = [...task]
+        else emergency ? Memory.shareTask.unshift(...task) : Memory.shareTask.push(...task)
         return OK
     },
     /**

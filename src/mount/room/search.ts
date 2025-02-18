@@ -1,7 +1,8 @@
+import LayoutExtension from "./layout"
 /**
  * 查询相关
  */
-export default class SearchExtension extends Room {
+export default class SearchExtension extends LayoutExtension {
     /**
   * 查找房间中的有效能量来源
   */
