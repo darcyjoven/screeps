@@ -1,4 +1,6 @@
+import { filter } from "lodash"
 import { fillerMinEnemy } from "setting/global"
+import { info } from "utils/terminal"
 
 const TRANSFER_DEATH_LIMIT = 20
 
@@ -16,11 +18,31 @@ export const roles: {
       let target: StructureContainer | Source | ConstructionSite | null = null
       // 如果没有缓存获取目标缓存
       let data: HarvesterData = creep.memory.data as HarvesterData
+      info(['creepPrepare', 'harvester'], 'prepare 开始', 'name', creep.name, 'data', data)
       if (data.targetId) {
         target = Game.getObjectById<StructureContainer | Source | ConstructionSite>(data.targetId as Id<StructureContainer | Source | ConstructionSite>)
       }
-      const source = Game.getObjectById<Source>(data.sourceId as Id<Source>)
-
+      let source = Game.getObjectById<Source>(data.sourceId as Id<Source>)
+      if (!source) {
+        const sources = creep.room.find(FIND_SOURCES, {
+          filter: s => {
+            if (!creep.room.memory.structure ||
+              !creep.room.memory.structure.source ||
+              !creep.room.memory.structure.source[s.id]) return true
+            if (!creep.room.memory.structure.source[s.id].belong ||
+              creep.room.memory.structure.source[s.id].belong === creep.name ||
+              !Game.creeps[creep.room.memory.structure.source[s.id].belong!]
+            ) return true
+            return false
+          }
+        })
+        if (sources.length > 0) {
+          source = sources[0]
+          if (!creep.room.memory.structure) creep.room.memory.structure = {}
+          if (!creep.room.memory.structure.source) creep.room.memory.structure.source = { [source.id]: { belong: creep.name } }
+          creep.room.memory.structure.source[source.id] = { belong: creep.name }
+        }
+      }
       // 没有缓存或者缓存失效要重新获取
       if (!target && source) {
         // 先尝试获取 container
@@ -37,7 +59,8 @@ export const roles: {
         })
         if (constructionSite.length > 0) target = constructionSite[0]
       }
-
+      info(['creepPrepare', 'harvester'], 'target 获取', { target })
+      info(['creepPrepare', 'harvester'], 'source 获取', { source })
       // 如果还是没找到的话就用 source 当作目标
       if (!target) target = source
       if (target) {

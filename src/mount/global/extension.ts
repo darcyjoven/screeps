@@ -48,7 +48,7 @@ export default {
         if (!Memory.shareTask) return
         if (Memory.shareTask.length === 0) return
         const result = Memory.shareTask[0]
-        Memory.shareTask.unshift()
+        Memory.shareTask.shift()
         return result
     }
 }

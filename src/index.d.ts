@@ -184,6 +184,9 @@ type RoomTask = {
   power?: PowerTask[]
   spawn?: SpawnTask[]
 }
+interface SourceMemory {
+  belong?: string
+}
 interface RoomMemory {
   spawnList: string[] // 孵化清单
   // 路径缓存
@@ -205,6 +208,9 @@ interface RoomMemory {
   task?: RoomTask
   stat?: {
     currentState: OperationState
+  }
+  structure?: {
+    source?: Record<string, SourceMemory>
   }
 }
 interface SpawnMemory {

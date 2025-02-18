@@ -1,4 +1,6 @@
 import SearchExtension from "./search"
+import { info } from "utils/terminal"
+
 /**
  * 任务相关
  */
@@ -42,7 +44,9 @@ export default class TaskExtension extends SearchExtension {
 	public finishSpawnTask() {
 		if (!this.memory.task) return
 		if (!this.memory.task.spawn) return
-		this.memory.task.spawn.unshift()
+		info(['roomTask', 'spawn'], 'finish', 'length', this.memory.task.spawn)
+		this.memory.task.spawn.shift()
+		info(['roomTask', 'spawn'], 'finish', 'length', this.memory.task.spawn)
 	}
 	public nextCenterTask(): CenterTask | undefined {
 		if (!this.memory.task) return
@@ -56,7 +60,7 @@ export default class TaskExtension extends SearchExtension {
 	public finishCenterTask() {
 		if (!this.memory.task) return
 		if (!this.memory.task.center) return
-		this.memory.task.center.unshift()
+		this.memory.task.center.shift()
 	}
 	public nextTransferTask(): TransferTask | undefined {
 		if (!this.memory.task) return
@@ -70,7 +74,7 @@ export default class TaskExtension extends SearchExtension {
 	public finishTransferTask() {
 		if (!this.memory.task) return
 		if (!this.memory.task.transfer) return
-		this.memory.task.transfer.unshift()
+		this.memory.task.transfer.shift()
 	}
 	public nextPowerTask(): PowerTask | undefined {
 		if (!this.memory.task) return
@@ -84,7 +88,7 @@ export default class TaskExtension extends SearchExtension {
 	public finishPowerTask() {
 		if (!this.memory.task) return
 		if (!this.memory.task.power) return
-		this.memory.task.power.unshift()
+		this.memory.task.power.shift()
 	}
 	public nextShareTask(): ShareTask | undefined {
 		return nextShareTask()

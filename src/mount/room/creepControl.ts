@@ -56,93 +56,106 @@ export default class CreepControl extends ConfigExtension {
         }
         info(['creepNumberControl'], 'room', this.name, 'creep 数量控制 结束')
     }
-}
-
-const stateControls: Record<OperationState, CreepRole[]> = {
-    claim: [
-        'Harvester',
-        'Harvester',
-        'Builder',
-    ],
-    container: [
-        'Harvester',
-        'Harvester',
-        'Builder',
-        'Filler',
-        'Filler',
-        'Upgrader',
-        'Upgrader',
-        'Upgrader',
-        'Upgrader',
-    ],
-    storage: [
-        'Harvester',
-        'Harvester',
-        'Builder',
-        'Filler',
-        'Filler',
-        'Upgrader',
-        'Upgrader',
-        'Upgrader',
-        'Upgrader',
-        'Upgrader',
-        'Upgrader',
-        'Manager'
-    ],
-    link: [
-        'Harvester',
-        'Harvester',
-        'Builder',
-        'Filler',
-        'Filler',
-        'Filler',
-        'Upgrader',
-        'Upgrader',
-        'Upgrader',
-        'Upgrader',
-        'Upgrader',
-        'Upgrader',
-        'Upgrader',
-        'Upgrader',
-        'Manager',
-        'Processor'
-    ]
-}
-
-/**
- * 判断房间的运维阶段
- * @param room 
- * @returns 
- */
-const getCurrentState = (room: Room): OperationState => {
-    return 'claim'
-}
-/**
- * 从this.memory.task.spawn,creep,运维配置
- * 
- * 获取有哪些creep还未进任务清单
- */
-const getToSpawn = (tasks: SpawnTask[], creeps: Creep[], state: OperationState): CreepRole[] => {
-    // 复制数组，避免修改外部数据
-    let configsCopy = [...stateControls[state]]
-    let creepsCopy = [...creeps]
-    let tasksCopy = [...tasks]
-
-    outer: for (let i = configsCopy.length - 1; i >= 0; i--) {
-        for (let j = creepsCopy.length - 1; j >= 0; j--) {
-            if (creepsCopy[j].memory.role === configsCopy[i]) {
-                configsCopy.splice(i, 1)
-                creepsCopy.splice(j, 1)
-                continue outer
-            }
+    /**
+     * 清除死亡的creep内存
+     */
+    public clearCreepMemory(): void {
+        let toDel: string[] = []
+        for (const name in Memory.creeps) {
+            if (!_.some(Game.creeps, creep => creep.name === name)) toDel.push(name)
         }
-        for (let k = tasksCopy.length - 1; k >= 0; k--) {
-            if (tasksCopy[k] === configsCopy[i]) {
-                configsCopy.splice(i, 1)
-                tasksCopy.splice(k, 1)
-                continue outer
-            }
-        }
+        toDel.forEach(name => {
+            delete Memory.creeps[name]
+            this.log(`清除死亡creep[${name}]的内存`,'creep','red')
+        })
     }
-    return configsCopy
-} 
+}
+
+    const stateControls: Record<OperationState, CreepRole[]> = {
+        claim: [
+            'Harvester',
+            'Harvester',
+            'Builder',
+        ],
+        container: [
+            'Harvester',
+            'Harvester',
+            'Builder',
+            'Filler',
+            'Filler',
+            'Upgrader',
+            'Upgrader',
+            'Upgrader',
+            'Upgrader',
+        ],
+        storage: [
+            'Harvester',
+            'Harvester',
+            'Builder',
+            'Filler',
+            'Filler',
+            'Upgrader',
+            'Upgrader',
+            'Upgrader',
+            'Upgrader',
+            'Upgrader',
+            'Upgrader',
+            'Manager'
+        ],
+        link: [
+            'Harvester',
+            'Harvester',
+            'Builder',
+            'Filler',
+            'Filler',
+            'Filler',
+            'Upgrader',
+            'Upgrader',
+            'Upgrader',
+            'Upgrader',
+            'Upgrader',
+            'Upgrader',
+            'Upgrader',
+            'Upgrader',
+            'Manager',
+            'Processor'
+        ]
+    }
+
+    /**
+     * 判断房间的运维阶段
+     * @param room 
+     * @returns 
+     */
+    const getCurrentState = (room: Room): OperationState => {
+        return 'claim'
+    }
+    /**
+     * 从this.memory.task.spawn,creep,运维配置
+     * 
+     * 获取有哪些creep还未进任务清单
+     */
+    const getToSpawn = (tasks: SpawnTask[], creeps: Creep[], state: OperationState): CreepRole[] => {
+        // 复制数组，避免修改外部数据
+        let configsCopy = [...stateControls[state]]
+        let creepsCopy = [...creeps]
+        let tasksCopy = [...tasks]
+
+        outer: for (let i = configsCopy.length - 1; i >= 0; i--) {
+            for (let j = creepsCopy.length - 1; j >= 0; j--) {
+                if (creepsCopy[j].memory.role === configsCopy[i]) {
+                    configsCopy.splice(i, 1)
+                    creepsCopy.splice(j, 1)
+                    continue outer
+                }
+            }
+            for (let k = tasksCopy.length - 1; k >= 0; k--) {
+                if (tasksCopy[k] === configsCopy[i]) {
+                    configsCopy.splice(i, 1)
+                    tasksCopy.splice(k, 1)
+                    continue outer
+                }
+            }
+        }
+        return configsCopy
+    } 

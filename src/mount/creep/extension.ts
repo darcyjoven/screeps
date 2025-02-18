@@ -1,12 +1,15 @@
 import { dashRange, stanbyRange, minWallHits } from "setting/global"
 import { unserializePos, getSurroundingPos, serializePos, getOppositeDirection } from "utils/path"
 import roles from "creep"
+import { info } from "utils/terminal"
+
 // creep 原型拓展
 export default class CreepExtension extends Creep {
   /**
    * 主要工作
    */
   public work(): void {
+    info(['creepMount', 'creepWork'], 'work 开始', 'role', this.memory.role, 'name', this.name,)
     // 检查角色正确否
     if (!(this.memory.role in roles)) {
       this.log(`找不到对应的 creepConfig`, 'yellow')
@@ -27,20 +30,25 @@ export default class CreepExtension extends Creep {
     // 获取creep的配置
     const creepConfig: CreepCycle = roles[this.memory.role as CreepRole](this.memory.data)
 
+    info(['creepMount', 'creepWork'], 'prepare', this.memory.ready)
     // 还未准备好
     if (!this.memory.ready) {
       if (creepConfig.prepare) this.memory.ready = creepConfig.prepare(this)
       else this.memory.ready = true
     }
+    info(['creepMount', 'creepWork'], 'after prepare', this.memory.ready)
     // 还未准备就继续下一个tick
     if (!this.memory.ready) return
     // 获取是否有工作
+    info(['creepMount', 'creepWork'], 'working', this.memory.working)
     const working = creepConfig.source ? this.memory.working : true
     let stateChange = false
     // 执行阶段
+    info(['creepMount', 'creepWork'], 'after working', working)
     if (working) if (creepConfig.target && creepConfig.target(this)) stateChange = true
     else if (creepConfig.source && creepConfig.source(this)) stateChange = true
 
+    info(['creepMount', 'creepWork'], 'stateChange', stateChange)
     // 状态变化了就释放工作位置
     if (stateChange) {
       this.memory.working = !this.memory.working
@@ -256,8 +264,8 @@ export default class CreepExtension extends Creep {
 
     if (wall.hits < minWallHits) {
       if (this.repair(wall) === ERR_NOT_IN_RANGE) this.goTo(wall.pos)
-    }else delete this.memory.fillWallId
-    
+    } else delete this.memory.fillWallId
+
     return OK
   }
   /**
