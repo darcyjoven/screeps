@@ -1,4 +1,4 @@
-import { log, createRoomLink } from "utils/teminal"
+import { log, createRoomLink } from "utils/terminal"
 /**
  * 一些房间内的配置
  */

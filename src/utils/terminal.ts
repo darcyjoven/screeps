@@ -212,7 +212,12 @@ const infoShow: Record<string, boolean> = {
 /**
  * 输出debug信息
  */
-export function info(module: string, ...content: any[]): void {
-    if (!global.isDebug || !infoShow[module]) return
-    console.log(JSON.stringify(content))
+export function info(module: string[], ...content: any[]): void {
+    if (!global.isDebug) return
+    module.forEach(m => {
+        if (infoShow[m]) {
+            console.log(JSON.stringify(content))
+            return
+        }
+    })
 }

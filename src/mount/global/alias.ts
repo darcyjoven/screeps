@@ -2,7 +2,7 @@
  * 定义了一些常用的命令
 */
 import { colorful } from "utils/color"
-import { createHelp } from "utils/teminal"
+import { createHelp } from "utils/terminal"
 
 export default [
   {

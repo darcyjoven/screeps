@@ -1,4 +1,4 @@
-import { info } from "./teminal"
+import { info } from "./terminal"
 /**
  * 所有单位开始工作
  * @param workders 
