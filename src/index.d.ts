@@ -203,7 +203,9 @@ interface RoomMemory {
   buildStructure?: BuildStructure
   // 任务
   task?: RoomTask
-  creepControl: CNCMemory
+  stat?: {
+    currentState: OperationState
+  }
 }
 interface SpawnMemory {
   belong: string | null
@@ -225,7 +227,21 @@ interface Room {
   // 敌人缓存
   _enemys: Creep[]
   registerContainer(structure: StructureContainer): void
-  creepController: CreepController
+  addSpawnTask(emergency: boolean, ...role: SpawnTask[]): OK | ERR_NAME_EXISTS | ERR_INVALID_TARGET
+  addCenterTask(emergency: boolean, ...task: CenterTask[]): OK | ERR_NAME_EXISTS | ERR_INVALID_TARGET
+  addTransferTask(emergency: boolean, ...task: TransferTask[]): OK | ERR_NAME_EXISTS | ERR_INVALID_TARGET
+  addPowerTask(emergency: boolean, ...task: PowerTask[]): OK | ERR_NAME_EXISTS | ERR_INVALID_TARGET
+  addShareTask(emergency: boolean, ...task: ShareTask[]): OK | ERR_NAME_EXISTS | ERR_INVALID_TARGET
+  nextSpawnTask(): SpawnTask | undefined
+  nextCenterTask(): CenterTask | undefined
+  nextTransferTask(): TransferTask | undefined
+  nextPowerTask(): PowerTask | undefined
+  nextShareTask(): ShareTask | undefined
+  finishSpawnTask(): void
+  finishCenterTask(): void
+  finishTransferTask(): void
+  finishPowerTask(): void
+  finishShareTask(): void
 }
 
 type Colors = 'green' | 'blue' | 'yellow' | 'red'
@@ -302,54 +318,11 @@ interface ApiDescribe {
 
 /*********************** Global 全局声明 ************************/
 
-declare function addShareTask(task: ShareTask, emergency: boolean): OK | ERR_NAME_EXISTS | ERR_INVALID_TARGET;
+declare function addShareTask(emergency: boolean, ...task: ShareTask[]): OK | ERR_NAME_EXISTS | ERR_INVALID_TARGET;
 declare function nextShareTask(): ShareTask | undefined;
+declare function finishShareTask(): void;
 
 
 
 /*****************Creep Controller Module ********************/
-type Role = 'harvester' | 'collector' | 'filler' | 'manager' | 'processor' | 'upgrader' | 'builder'
-
-interface CreepControl {
-  role: Role
-  data?: CreepMemory
-}
-// 运维阶段
 type OperationState = 'claim' | 'container' | 'storage' | 'link'
-
-// 内存配置（CNC Creep Number Control）
-interface CNCMemory {
-  creep: { [key: string]: CreepControl[] }
-  config: {
-    currentState: OperationState
-  }
-}
-interface CreepControllerContext {
-  // 房间名称
-  room: string
-  // 获取当前Memory
-  getMemory: () => CNCMemory
-  // 判断creep角色
-  getRole: (creep: Creep) => Role | undefined
-  // creep命名
-  getName: (role: Role) => string
-  // 获得身体配置
-  getBodyPart: (role: Role) => BodyPartConstant[]
-  /**
-   * 获取当前creep
-   * 包括正在孵化和孵化队列中的creep
-   */
-  getCreeps: () => Creep[]
-  // 借用spawn
-  lendSpawn: () => boolean
-  remandSpawn: () => boolean
-}
-
-interface CreepController {
-  spawnCreep: (body: BodyPartConstant[], name: string, memory?: CreepMemory) => ScreepsReturnCode;
-  addCreep: (...configs: CreepControl[]) => void;
-  delCreep: (creep: Creep, cnt: number) => boolean;
-  updateMemory: () => any;
-  stateChange: (state: OperationState) => any; // Replace 'any' with the actual return type if known
-  run: () => void;
-}

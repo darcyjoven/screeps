@@ -18,3 +18,5 @@ export const removeArray = <T>(list: T[], predicate: (item: T) => boolean, cnt: 
 
     return result;
 };
+
+export const generateCreepId = (): string => Math.random().toString(36).substring(2, 5);

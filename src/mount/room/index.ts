@@ -4,13 +4,9 @@ import LayoutExtension from "./layout";
 import SearchExtension from "./search";
 import TaskExtension from "./task";
 import { assignPrototype } from "utils/mount";
-import { info } from "utils/teminal";
+import CreepControl from "./creepControl";
 
-export default () => { 
-    assignPrototype(Room, ConfigExtension)
-    assignPrototype(Room, RoomExtension)
-    assignPrototype(Room, LayoutExtension)
-    assignPrototype(Room, SearchExtension)
-    assignPrototype(Room, TaskExtension) 
-}
+const plugins = [ConfigExtension, CreepControl, RoomExtension, LayoutExtension, SearchExtension, TaskExtension]
+
+export default () => plugins.forEach(plugin => { assignPrototype(Room, plugin) })
 
