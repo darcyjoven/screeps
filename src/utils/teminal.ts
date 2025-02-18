@@ -205,29 +205,14 @@ export function createRoomLink(roomName: string): string {
 export function createLink(content: string, url: string, newTab: boolean = true): string {
     return `<a href="${url}" target="${newTab ? '_blank' : '_self'}">${content}</a>`
 }
+
+const infoShow: Record<string, boolean> = {
+    'creepNumberControl': false,
+}
 /**
  * 输出debug信息
  */
 export function info(module: string, ...content: any[]): void {
-    if (!global.isDebug && infoShow(module)) return
+    if (!global.isDebug || !infoShow[module]) return
     console.log(JSON.stringify(content))
-}
-
-/**
- * 控制各个模块是否进行日志输出
- */
-const infoShow = (module: string): boolean => {
-    switch (module) {
-        case 'creep': return false
-        case 'mount/creep': return false
-        case 'mount/global': return false
-        case 'mount/room': return false
-        case 'mount/roomPosition': return false
-        case 'mount/structure/spawn': return false
-        case 'setting': return false
-        case 'util': return false
-        case 'main': return false
-        default:
-            return false
-    }
 }

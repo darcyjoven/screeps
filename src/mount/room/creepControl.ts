@@ -5,9 +5,9 @@ import { generateCreepId } from "utils/tool";
 
 export default class CreepControl extends ConfigExtension {
     public creepNumberControl(): void {
-        info('mount/room', 'room', this.name, 'creep 数量控制 开始')
+        info('creepNumberControl', 'room', this.name, 'creep 数量控制 开始')
         if (!this.memory.stat) this.memory.stat = { currentState: getCurrentState(this) }
-        info('mount/room', 'room', this.name, '运维阶段', this.memory.stat.currentState)
+        info('creepNumberControl', 'room', this.name, '运维阶段', this.memory.stat.currentState)
         if (!this.memory.task) this.memory.task = {}
         if (!this.memory.task.spawn) this.memory.task.spawn = []
         // 还需要加入队列中的角色
@@ -16,16 +16,16 @@ export default class CreepControl extends ConfigExtension {
             this.find(FIND_MY_CREEPS),
             this.memory.stat.currentState,
         )
-        info('mount/room', this.addSpawnTask)
+        info('creepNumberControl', this.addSpawnTask)
         if (toSpawn.length > 0) this.addSpawnTask(false, ...toSpawn)
-        info('mount/room', `${toSpawn.length}个Creep加入了孵化队列`, toSpawn)
+        info('creepNumberControl', `${toSpawn.length}个Creep加入了孵化队列`, toSpawn)
 
         // 寻找可用spawn
         const spawns = this.find(FIND_MY_SPAWNS, {
             filter: spawn => !spawn.spawning && (!spawn.memory.belong || spawn.memory.belong === "creepControll")
         })
         if (spawns.length === 0) {
-            info('mount/room', `无spawn可用`)
+            info('creepNumberControl', `无spawn可用`)
             return
         }
 
@@ -33,7 +33,7 @@ export default class CreepControl extends ConfigExtension {
         for (const spawnName in spawns) {
             const creep = this.nextSpawnTask()
             if (!creep) {
-                info('mount/room', `当前无孵化任务`)
+                info('creepNumberControl', `当前无孵化任务`)
                 break
             }
             const name = `${this.name}-${creep}-${generateCreepId()}`
@@ -52,9 +52,9 @@ export default class CreepControl extends ConfigExtension {
                 }
             })
             if (result === OK) this.finishSpawnTask()
-            else info('mount/room', `[${this.name}] [${spawnName}]`, `孵化失败，错误代码${result}`)
+            else info('creepNumberControl', `[${this.name}] [${spawnName}]`, `孵化失败，错误代码${JSON.stringify({ result })}`)
         }
-        info('mount/room', 'room', this.name, 'creep 数量控制 结束')
+        info('creepNumberControl', 'room', this.name, 'creep 数量控制 结束')
     }
 }
 
