@@ -145,7 +145,7 @@ const bodyConfigs: BodyConfig = {
  * @param controllerLevel 控制器等级
  * @returns 返回身体构造
  */
-export function getBodyConfig(role: CreepRole, controllerLevel: number): BodyPartConstant[] | null {
+export function getBodyConfig(role: CreepRole, controllerLevel: number): BodyPartConstant[]  {
   for (const [bodyRole, roles] of Object.entries(bodyRoleMap)) {
     if (roles.includes(role)) {
       const levelConfig = bodyConfigs[bodyRole as BodyConfigRole];
@@ -156,6 +156,6 @@ export function getBodyConfig(role: CreepRole, controllerLevel: number): BodyPar
         .reduce((acc, val) => acc.concat(val), []); // 使用 reduce 兼容 Node 10
     }
   }
-  return null; // 未找到匹配的身体配置
+  return []; // 未找到匹配的身体配置
 }
 

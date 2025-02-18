@@ -34,7 +34,7 @@ type BodyConfig = Record<BodyConfigRole,
 /**************** Creep周期定义 ********************/
 interface CreepCycle {
   // 每次死后都会进行判断，只有返回 true 时才会重新发布孵化任务
-  isNeed?: (room: Room, creepName: string, preMemory: CreepMemory) => boolean
+  isNeed?: (creep: Creep) => boolean
   // 准备阶段执行的方法, 返回 true 时代表准备完成
   prepare?: (creep: Creep) => boolean
   // creep 获取工作所需资源时执行的方法
@@ -87,8 +87,8 @@ interface CreepMemory {
   crossable: boolean
   // 是否被对穿
   standed: boolean
-  role: string
-  reSpawn: boolean
+  role: CreepRole
+  noNeed?: boolean
   ready: boolean
   // 待命位置
   isStandBy: boolean
@@ -188,7 +188,7 @@ interface SourceMemory {
   belong?: string
 }
 interface RoomMemory {
-  spawnList: string[] // 孵化清单
+  spawnList: CreepRole[] // 孵化清单
   // 路径缓存
   routeCache: {
     // 键为路径的起点和终点名，例如："12/32/W1N1 23/12/W2N2"，值是使用 Creep.serializeFarPath 序列化后的路径
@@ -208,13 +208,14 @@ interface RoomMemory {
   task?: RoomTask
   stat?: {
     currentState: OperationState
+    creepConfigs: Partial<Record<CreepRole, number>>
   }
   structure?: {
     source?: Record<string, SourceMemory>
   }
 }
 interface SpawnMemory {
-  belong: string | null
+  belong?: string | null
 }
 
 
@@ -248,6 +249,7 @@ interface Room {
   finishTransferTask(): void
   finishPowerTask(): void
   finishShareTask(): void
+  needSpawn(role: CreepRole): boolean
 }
 
 type Colors = 'green' | 'blue' | 'yellow' | 'red'
@@ -332,3 +334,13 @@ declare function finishShareTask(): void;
 
 /*****************Creep Controller Module ********************/
 type OperationState = 'claim' | 'container' | 'storage' | 'link'
+
+
+/****************** Spawn 扩展 ******************/
+interface StructureSpawn {
+  work(): void
+  canSpawn(body: BodyPartConstant[],): ScreepsReturnCode
+  lend(by: string): boolean
+  canLend(by: string): boolean
+  remend(by: string): boolean
+}

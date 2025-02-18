@@ -5,21 +5,21 @@ export const roles: {
         prepare: (creep: Creep): boolean => { return true },
         target: (creep: Creep): boolean => { return true },
         source: (creep: Creep): boolean => { return true },
-        isNeed: (room: Room, creepName: string, preMemory: CreepMemory): boolean => { return true },
+        isNeed: (creep:Creep): boolean => { return true },
         bodys: "Collector"
     })) as (data: CreepData) => CreepCycle,
     RemoteHauler:((data: CreepData): CreepCycle => ({
         prepare: (creep: Creep): boolean => { return true },
         target: (creep: Creep): boolean => { return true },
         source: (creep: Creep): boolean => { return true },
-        isNeed: (room: Room, creepName: string, preMemory: CreepMemory): boolean => { return true },
+        isNeed: (creep:Creep): boolean => { return true },
         bodys: "Collector"
     })) as (data: CreepData) => CreepCycle,
     RemoteDefender:((data: CreepData): CreepCycle => ({
         prepare: (creep: Creep): boolean => { return true },
         target: (creep: Creep): boolean => { return true },
         source: (creep: Creep): boolean => { return true },
-        isNeed: (room: Room, creepName: string, preMemory: CreepMemory): boolean => { return true },
+        isNeed: (creep:Creep): boolean => { return true },
         bodys: "Collector"
     })) as (data: CreepData) => CreepCycle,
 }

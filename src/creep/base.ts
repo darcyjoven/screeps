@@ -44,7 +44,7 @@ export const roles: {
           creep.room.memory.structure.source[source.id] = { belong: creep.name }
         }
       }
-      if (!data.sourceId && source){
+      if (!data.sourceId && source) {
         data.sourceId = source.id
         creep.memory.data = data
       }
@@ -142,21 +142,31 @@ export const roles: {
       if (creep.ticksToLive && creep.ticksToLive < 2) creep.drop(RESOURCE_ENERGY)
       return false
     },
-    isNeed: (room: Room, creepName: string, preMemory: CreepMemory) => true,
+    isNeed: (creep: Creep) => {
+      // 不再需要孵化
+      if (creep.memory.noNeed === true) return false
+      return creep.room.needSpawn(creep.memory.role)
+    },
     bodys: "Harvester"
   })) as (data: CreepData) => CreepCycle,
   Worker: ((data: CreepData): CreepCycle => ({
     prepare: (creep: Creep): boolean => { return true },
     target: (creep: Creep): boolean => { return true },
     source: (creep: Creep): boolean => { return true },
-    isNeed: (room: Room, creepName: string, preMemory: CreepMemory): boolean => { return true },
+    isNeed: (creep: Creep): boolean => {
+      if (creep.memory.noNeed === true) return false
+      return creep.room.needSpawn(creep.memory.role)
+    },
     bodys: "Collector"
   })) as (data: CreepData) => CreepCycle,
   Hauler: ((data: CreepData): CreepCycle => ({
     prepare: (creep: Creep): boolean => { return true },
     target: (creep: Creep): boolean => { return true },
     source: (creep: Creep): boolean => { return true },
-    isNeed: (room: Room, creepName: string, preMemory: CreepMemory): boolean => { return true },
+    isNeed: (creep: Creep): boolean => {
+      if (creep.memory.noNeed === true) return false
+      return creep.room.needSpawn(creep.memory.role)
+    },
     bodys: "Worker"
   })) as (data: CreepData) => CreepCycle,
   /**
@@ -187,24 +197,10 @@ export const roles: {
       // 开始采集
       const harvestResult = creep.harvest(source)
       if (harvestResult === ERR_NOT_IN_RANGE) creep.goTo(source.pos)
-      // TODO 重新发布任务
-      // else if (actionResult === ERR_NOT_ENOUGH_RESOURCES) {
-      //   // 如果满足下列条件就重新发送 regen_source 任务
-      //   if (
-      //     // creep 允许重新发布任务
-      //     (!creep.memory.regenSource || creep.memory.regenSource < Game.time) &&
-      //     // source 上没有效果
-      //     (!source.effects || !source.effects[PWR_REGEN_SOURCE])
-      //   ) {
-      //     // 并且房间内的 pc 支持这个任务
-      //     if (creep.room.memory.powers && creep.room.memory.powers.split(' ').includes(String(PWR_REGEN_SOURCE))) {
-      //       // 添加 power 任务，设置重新尝试时间
-      //       creep.room.addPowerTask(PWR_REGEN_SOURCE)
-      //       creep.memory.regenSource = Game.time + 300
-      //     }
-      //     else creep.memory.regenSource = Game.time + 1000
-      //   }
-      // }
+      else if (harvestResult === ERR_NOT_ENOUGH_RESOURCES) {
+        // 如果满足下列条件就重新发送 regen_source 任务
+        // TODO 发布任务 PowerTask
+      }
 
       // 快死了就把能量移出去
       if (creep.ticksToLive && creep.ticksToLive <= 3) return true
@@ -223,7 +219,10 @@ export const roles: {
       if (creep.giveTo(target, RESOURCE_ENERGY) !== OK) return false
       return creep.store.getUsedCapacity() === 0
     },
-    isNeed: (room: Room, creepName: string, preMemory: CreepMemory): boolean => { return true },
+    isNeed: (creep: Creep): boolean => {
+      if (creep.memory.noNeed === true) return false
+      return creep.room.needSpawn(creep.memory.role)
+    },
     bodys: "Collector"
   })) as (data: CreepData) => CreepCycle,
   /**
@@ -232,6 +231,28 @@ export const roles: {
      * 从指定建筑中获取能量 > 升级 controller
      */
   Upgrader: ((data: WorkerData): CreepCycle => ({
+    // 初始化配置文件
+    prepare: (creep: Creep): boolean => {
+      if (creep.memory.data && data.sourceId != '') return true
+      const sources = creep.room.find(FIND_STRUCTURES, {
+        filter: s => s.structureType in [STRUCTURE_TERMINAL, STRUCTURE_STORAGE, STRUCTURE_CONTAINER]
+      })
+      if (!sources || sources.length <= 0) return false
+      // 按照顺序找source
+      let source = _.sortBy(sources, s => {
+        switch (s.structureType) {
+          case STRUCTURE_TERMINAL: return 0
+          case STRUCTURE_STORAGE: return 1
+          case STRUCTURE_CONTAINER: return 2
+          default: return 3
+        }
+      })[0]
+      creep.memory.data = {
+        sourceId: source.id
+      }
+      creep.memory.ready = true
+      return true
+    },
     source: (creep: Creep): boolean => {
       // 因为只会从建筑里拿，所以只要拿到了就去升级
       if (creep.store[RESOURCE_ENERGY] > 0) return true
@@ -249,17 +270,23 @@ export const roles: {
         (result === ERR_NOT_ENOUGH_RESOURCES || result === ERR_INVALID_TARGET) &&
         (source instanceof StructureTerminal || source instanceof StructureStorage)
       ) {
-        // 如果发现能量来源（建筑）里没有能量了，就自杀并重新运行 upgrader 发布规划
-        // creep.room.releaseCreep('upgrader')
-        // TODO 重新孵化
-        creep.suicide()
+        // 如果发现能量来源（建筑）里没有能量了，就自杀并重新运行 upgrader 发布规划 
+        // 重回prepare阶段
+        creep.memory.ready = false
+        if (creep.memory.data) {
+          (creep.memory.data as WorkerData).sourceId = ''
+        }
+        return false
       }
       return false
     },
     target: (creep: Creep): boolean => {
       return creep.upgrade() === ERR_NOT_ENOUGH_RESOURCES
     },
-    isNeed: (room: Room, creepName: string, preMemory: CreepMemory): boolean => { return true },
+    isNeed: (creep: Creep): boolean => {
+      if (creep.memory.noNeed === true) return false
+      return creep.room.needSpawn(creep.memory.role)
+    },
     bodys: "Upgrader"
   })) as (data: CreepData) => CreepCycle,
   /**
@@ -298,9 +325,9 @@ export const roles: {
 
       return creep.store.getUsedCapacity() === 0
     },
-    isNeed: (room: Room, creepName: string, preMemory: CreepMemory): boolean => {
+    isNeed: (creep: Creep): boolean => {
       // 工地都建完就就使命完成
-      const targets: ConstructionSite[] = room.find(FIND_MY_CONSTRUCTION_SITES)
+      const targets: ConstructionSite[] = creep.room.find(FIND_MY_CONSTRUCTION_SITES)
       return targets.length > 0 ? true : false
     },
     bodys: "Builder"
@@ -329,8 +356,11 @@ export const roles: {
       return true
     },
     // 能量来源（container）没了就自觉放弃
-    isNeed: (room: Room, creepName: string, preMemory: CreepMemory): boolean =>
-      _.some(room.sourceContainers, container => container.id === data.sourceId),
+    isNeed: (creep: Creep): boolean => {
+      if (!_.some(creep.room.sourceContainers, container => container.id === data.sourceId)) return false
+      if (creep.memory.noNeed === true) return false
+      return creep.room.needSpawn(creep.memory.role)
+    },
     bodys: "Collector"
   })) as (data: CreepData) => CreepCycle,
   /**
@@ -354,7 +384,7 @@ export const roles: {
       return true
     },
     target: (creep: Creep): boolean => { return true },
-    isNeed: (room: Room, creepName: string, preMemory: CreepMemory): boolean => { return true },
+    isNeed: (creep: Creep): boolean => { return true },
     bodys: "Processor"
   })) as (data: CreepData) => CreepCycle,
   /**
@@ -372,7 +402,10 @@ export const roles: {
       // TODO 需要任务系统
       return true
     },
-    isNeed: (room: Room, creepName: string, preMemory: CreepMemory): boolean => { return true },
+    isNeed: (creep: Creep): boolean => {
+      if (creep.memory.noNeed === true) return false
+      return creep.room.needSpawn(creep.memory.role)
+    },
     bodys: "Manager"
   })) as (data: CreepData) => CreepCycle,
 }
