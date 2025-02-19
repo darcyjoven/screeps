@@ -214,6 +214,7 @@ interface RoomMemory {
   structure?: {
     source?: Record<string, SourceMemory>
   }
+  war?: boolean
 }
 interface SpawnMemory {
   belong?: string | null
@@ -243,6 +244,7 @@ interface Room {
   nextSpawnTask(): SpawnTask | undefined
   nextCenterTask(): CenterTask | undefined
   nextTransferTask(): TransferTask | undefined
+  nextTransferTaskBy<T extends TransferTask>(taskType: T['type']): T | undefined
   nextPowerTask(): PowerTask | undefined
   nextShareTask(): ShareTask | undefined
   finishSpawnTask(): void
@@ -345,4 +347,22 @@ interface StructureSpawn {
   lend(by: string): boolean
   canLend(by: string): boolean
   remend(by: string): boolean
+  needEnergy(): void
+  doSpawnTask(): void
+}
+
+interface StructureTower {
+  work(): void
+  needEnergy(): void
+}
+
+/**
+ * 基地布局信息
+ */
+type BaseLayout = {
+  // 不同等级下应建造的建筑
+  [controllerLevel in 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8]: {
+    // 该类型建筑应该被放置在什么地方
+    [structureType in StructureConstant]?: ([number, number] | null)[]
+  }
 }

@@ -1,15 +1,12 @@
 import ConfigExtension from "./config";
 import { info } from "utils/terminal";
-import { getBodyConfig } from "setting/creep";
-import { generateCreepId } from "utils/tool";
 
 export default class CreepControl extends ConfigExtension {
     /**
      * Creep数量控制
      * 
-     * 1. Room.memory.stat 未初始化，需要判断当前阶段并初始化
+     * Room.memory.stat 未初始化，需要判断当前阶段并初始化
      * 
-     * 2. 获取可以使用的spawn，进行孵化任务
      */
     public creepNumberControl(): void {
         info(['roomMount', 'creepControl'], '房间creep数量控制')
@@ -21,41 +18,42 @@ export default class CreepControl extends ConfigExtension {
             this.stateChange(state)
         }
         // 获取可以使用的spawn
-        const spawns = this.find(FIND_MY_SPAWNS, {
-            filter: s => s.canLend('creepControl')
-        })
+        // const spawns = this.find(FIND_MY_SPAWNS, {
+        //     filter: s => s.canLend('creepControl')
+        // })
 
         // 没有可用的spawn，不需要孵化
-        info(['roomMount', 'creepControl'], '寻找可以使用的spawn:', spawns.length)
-        if (spawns.length <= 0) return
-        // 没有任务，不需要孵化
-        if (!this.nextSpawnTask()) {
-            info(['roomMount', 'creepControl'], '无spawn任务')
-            return
-        }
+        // info(['roomMount', 'creepControl'], '寻找可以使用的spawn:', spawns.length)
+        // if (spawns.length <= 0) return
+        // // 没有任务，不需要孵化
+        // if (!this.nextSpawnTask()) {
+        //     info(['roomMount', 'creepControl'], '无spawn任务')
+        //     return
+        // }
 
         // 开始孵化
-        for (const spawn of spawns) {
-            const task = this.nextSpawnTask()
-            if (!task) break // 断言
-            if (!spawn.lend('creepControl')) {
-                info(['roomMount', 'creepControl'], 'spawn不可借用', 'name', spawn.name)
-                return
-            }
-            const name = `${this.name}/${task}/${generateCreepId()}`
-            const body = getBodyConfig(task, this.controller?.level || 1)
-            const reulst = spawn.spawnCreep(body, name, {
-                memory: {
-                    role: task, crossable: false, standed: false, ready: false,
-                    isStandBy: false, isStand: false, data: {}, goCache: false, working: false
-                }
-            })
-            info(['roomMount', 'creepControl'], 'SpawnCreep', 'name', name, 'body', body, 'result', reulst)
-            if (reulst === OK) {
-                // 孵化成功
-                this.finishSpawnTask()
-            }
-        }
+        // 不进行孵化，spawn自主进行孵化
+        // for (const spawn of spawns) {
+        //     const task = this.nextSpawnTask()
+        //     if (!task) break // 断言
+        //     if (!spawn.lend('creepControl')) {
+        //         info(['roomMount', 'creepControl'], 'spawn不可借用', 'name', spawn.name)
+        //         return
+        //     }
+        //     const name = `${this.name}/${task}/${generateCreepId()}`
+        //     const body = getBodyConfig(task, this.controller?.level || 1)
+        //     const reulst = spawn.spawnCreep(body, name, {
+        //         memory: {
+        //             role: task, crossable: false, standed: false, ready: false,
+        //             isStandBy: false, isStand: false, data: {}, goCache: false, working: false
+        //         }
+        //     })
+        //     info(['roomMount', 'creepControl'], 'SpawnCreep', 'name', name, 'body', body, 'result', reulst)
+        //     if (reulst === OK) {
+        //         // 孵化成功
+        //         this.finishSpawnTask()
+        //     }
+        // }
     }
     /**
      * 阶段转换
