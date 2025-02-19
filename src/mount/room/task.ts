@@ -71,6 +71,17 @@ export default class TaskExtension extends SearchExtension {
 			return result
 		}
 	}
+	/**
+	 * 寻找指定类型的Transfer任务
+	 */
+	public nextTransferTaskBy<T extends TransferTask>(taskType: T['type']): T | undefined {
+		if (!this.memory.task) return
+		if (!this.memory.task.transfer) return
+		if (this.memory.task.transfer.length === 0) return
+		else {
+			return _.find(this.memory.task.transfer, t => t.type === taskType) as T
+		}
+	}
 	public finishTransferTask() {
 		if (!this.memory.task) return
 		if (!this.memory.task.transfer) return

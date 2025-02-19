@@ -218,9 +218,7 @@ export default class CreepExtension extends Creep {
         const struct = _.find(currentPos.lookFor(LOOK_STRUCTURES), (s) => {
           return s.structureType === this.room.memory.buildStructure!.type
         })
-        if (struct) {
-          // TODO 这里可以执行建筑完成回调
-        }
+        if (struct) structureInfo(struct)
         target = this.nextStructure()
       }
       // 没换成直接获取
@@ -589,5 +587,32 @@ export default class CreepExtension extends Creep {
   }
   public log(content: string, color: Colors = 'blue', notify: boolean = false) {
     this.room.log(content, this.name, color, notify)
+  }
+}
+
+
+
+/**
+ *  建筑建立完成后的触发函数
+ */
+const structureInfo = (structure: Structure<StructureConstant>): void => {
+  switch (structure.structureType) {
+    case STRUCTURE_CONTAINER:
+      // 两个container都建立完成后，转变为container阶段
+      const conatiners = structure.room.find(FIND_STRUCTURES, {
+        filter: s => s.structureType === STRUCTURE_CONTAINER
+      })
+      if (conatiners && conatiners.length >= 2) {
+        if (structure.room.memory.stat && structure.room.memory.stat.currentState === 'claim') structure.room.stateChange('container')
+      }
+      break
+    case STRUCTURE_STORAGE:
+      // storage 建立完成后，转变为storage阶段
+      if (structure.room.memory.stat && structure.room.memory.stat.currentState === 'container') structure.room.stateChange('storage')
+      break
+    case STRUCTURE_LINK:
+      // link 建立完成后，转变为link阶段
+      if (structure.room.memory.stat && structure.room.memory.stat.currentState === 'storage') structure.room.stateChange('link')
+      break
   }
 }

@@ -1,4 +1,3 @@
-import { filter } from "lodash"
 import { fillerMinEnemy } from "setting/global"
 import { info } from "utils/terminal"
 
@@ -143,6 +142,11 @@ export const roles: {
       return false
     },
     isNeed: (creep: Creep) => {
+      // 如果centerLink已经建立，不需要继续孵化了
+      const links = creep.room.find(FIND_MY_STRUCTURES, {
+        filter: s => s.structureType === STRUCTURE_LINK
+      })
+      if (links && links.length > 0) return false
       // 不再需要孵化
       if (creep.memory.noNeed === true) return false
       return creep.room.needSpawn(creep.memory.role)
@@ -352,7 +356,7 @@ export const roles: {
     },
     // 维持房间能量填充
     target: (creep: Creep): boolean => {
-      // TODO 这里需要任务系统
+      // TODO 这里需要房间物流系统
       return true
     },
     // 能量来源（container）没了就自觉放弃

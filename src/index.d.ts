@@ -136,9 +136,10 @@ type CenterTask = {
 // 房间物流任务
 type TransferTask = ExtensionFill | TowerFill | NukerFill | PowerSpawnFill |
   LabInFill | LabOut | BoostGetResource | BoostGetEnergy | BootClear
-
+type TransferTaskConstant = 'Extension' | 'Tower' | 'Nuker' | 'Power' | 'LabIn' | 'LabOut'
+  | 'BoostGetResource' | 'BoostGetEnergy' | 'BoostClear'
 interface ExtensionFill {
-  type: string
+  type: TransferTaskConstant
 }
 interface TowerFill extends ExtensionFill {
   id: string
@@ -250,6 +251,7 @@ interface Room {
   finishPowerTask(): void
   finishShareTask(): void
   needSpawn(role: CreepRole): boolean
+  stateChange(state: OperationState): void
 }
 
 type Colors = 'green' | 'blue' | 'yellow' | 'red'

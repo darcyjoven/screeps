@@ -44,7 +44,12 @@ export default class CreepControl extends ConfigExtension {
             }
             const name = `${this.name}/${task}/${generateCreepId()}`
             const body = getBodyConfig(task, this.controller?.level || 1)
-            const reulst = spawn.spawnCreep(body, name)
+            const reulst = spawn.spawnCreep(body, name, {
+                memory: {
+                    role: task, crossable: false, standed: false, ready: false,
+                    isStandBy: false, isStand: false, data: {}, goCache: false, working: false
+                }
+            })
             info(['roomMount', 'creepControl'], 'SpawnCreep', 'name', name, 'body', body, 'result', reulst)
             if (reulst === OK) {
                 // 孵化成功
