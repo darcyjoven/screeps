@@ -254,6 +254,12 @@ interface Room {
   finishShareTask(): void
   needSpawn(role: CreepRole): boolean
   stateChange(state: OperationState): void
+  clearHostileStructures(): OK | ERR_NOT_FOUND 
+  setCenter(flagName: string): RoomPosition | undefined
+  findOptimalCenter(): RoomPosition[]
+  planConstruntureSite(level: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8): ConstructionSite[]
+  snapshotLayout(flagName: string): void
+  visualizeLayout(level: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8): void
 }
 
 type Colors = 'green' | 'blue' | 'yellow' | 'red'
@@ -365,4 +371,8 @@ type BaseLayout = {
     // 该类型建筑应该被放置在什么地方
     [structureType in StructureConstant]?: ([number, number] | null)[]
   }
+}
+
+interface Structure {
+  my?: boolean
 }

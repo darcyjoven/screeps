@@ -1,4 +1,4 @@
-import { STRUCTURE_TOWER_MIN_ENERGY, STRUCTURE_TOWER_MIN_ENERGY_WAR } from "setting/global"
+import { STRUCTURE_TOWER_MIN_ENERGY, STRUCTURE_TOWER_MIN_ENERGY_WAR, TASK_TOWER } from "setting/global"
 
 export default class TowerExtension extends StructureTower {
     public work() {

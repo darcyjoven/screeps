@@ -1,4 +1,4 @@
-import { STRUCTURE_NUKER_MIN_STORE_ENERGY, STRUCTURE_NUKER_MIN_TERMINAL_GHODIUM } from "setting/global"
+import { STRUCTURE_NUKER_MIN_STORE_ENERGY, STRUCTURE_NUKER_MIN_TERMINAL_GHODIUM, TASK_NUKER } from "setting/global"
 
 export default class NukerExtension extends StructureNuker {
     public work(): void {

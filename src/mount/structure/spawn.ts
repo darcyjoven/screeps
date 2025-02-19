@@ -1,5 +1,6 @@
 import { getBodyConfig } from "setting/creep"
 import { generateCreepId } from "utils/tool"
+import { TASK_EXTENSION } from "setting/global"
 
 export default class SpawnExtension extends StructureSpawn {
     public work(): void { 

@@ -84,3 +84,15 @@ export const STRUCTURE_TOWER_MIN_ENERGY_WAR = 900
  */
 export const STRUCTURE_NUKER_MIN_STORE_ENERGY = 300000
 export const STRUCTURE_NUKER_MIN_TERMINAL_GHODIUM = 0
+
+
+// TransgferTask Type
+export const TASK_EXTENSION = 'Extension'
+export const TASK_TOWER = 'Tower'
+export const TASK_NUKER = 'Nuker'
+export const TASK_POWER = 'Power'
+export const TASK_LABIN = 'LabIn'
+export const TASK_LABOUT = 'LabOut'
+export const TASK_BOOSTGETRESOURCE = 'BoostGetResource'
+export const TASK_BOOSTGETENERGY = 'BoostGetEnergy'
+export const TASK_BOOSTCLEAR = 'BoostClear'
