@@ -206,6 +206,7 @@ interface RoomMemory {
   buildStructure?: BuildStructure
   // 任务
   task?: RoomTask
+  // 状态
   stat?: {
     // 房间等级
     rcl?: number
@@ -214,9 +215,12 @@ interface RoomMemory {
     currentState: OperationState
     creepConfigs: Partial<Record<CreepRole, number>>
   }
+  // 建筑
   structure?: {
     source?: Record<string, SourceMemory>
+    container?: string[]
   }
+  
   war?: boolean
   layout?: {
     center?: { x: number, y: number }
