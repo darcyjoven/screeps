@@ -15,69 +15,59 @@ export const roles: {
     // 在这个阶段中，targetId 是指 container 或 conatiner 的工地或 source
     prepare: (creep: Creep) => {
       let target: StructureContainer | Source | ConstructionSite | null = null
-      // 如果没有缓存获取目标缓存
-      let data: HarvesterData = creep.memory.data as HarvesterData
-      info(['creepPrepare', 'harvester'], 'prepare 开始', 'name', creep.name, 'data', data)
+      let source: Source | null = null
+      // 取缓存
       if (data.targetId) {
-        target = Game.getObjectById<StructureContainer | Source | ConstructionSite>(data.targetId as Id<StructureContainer | Source | ConstructionSite>)
+        target = Game.getObjectById(data.targetId as Id<StructureContainer | Source | ConstructionSite>)
       }
-      let source = Game.getObjectById<Source>(data.sourceId as Id<Source>)
-      // 没有配置资料，要自行搜索
+      if (data.sourceId) {
+        source = Game.getObjectById(data.sourceId as Id<Source>)
+      }
+      // 没找到source,房间内搜索
       if (!source) {
-        const sources = creep.room.find(FIND_SOURCES, {
-          filter: s => {
-            if (!creep.room.memory.structure ||
-              !creep.room.memory.structure.source ||
-              !creep.room.memory.structure.source[s.id]) return true
-            if (!creep.room.memory.structure.source[s.id].belong ||
-              creep.room.memory.structure.source[s.id].belong === creep.name ||
-              !Game.creeps[creep.room.memory.structure.source[s.id].belong!]
-            ) return true
-            return false
-          }
-        })
-        if (sources.length > 0) {
-          source = sources[0]
-          if (!creep.room.memory.structure) creep.room.memory.structure = {}
-          if (!creep.room.memory.structure.source) creep.room.memory.structure.source = { [source.id]: { belong: creep.name } }
-          creep.room.memory.structure.source[source.id] = { belong: creep.name }
+        // 找到不属于其它creep的source
+        const sourceFind = _.find(creep.room.getSource(), (s =>
+          !creep.room.memory.source[s.id] ||
+          creep.room.memory.source[s.id].belong === creep.name
+        ))
+        if (sourceFind) {
+          source = Game.getObjectById(sourceFind.id as Id<Source>)
+          creep.room.memory.source[sourceFind.id].belong = creep.name
         }
       }
-      if (!data.sourceId && source) {
-        data.sourceId = source.id
-        creep.memory.data = data
+      // 找不到就没法工作
+      if (!source) {
+        creep.log('未找到任何可以使用的source,creep无法工作', 'red')
+        return false
       }
-      // 没有缓存或者缓存失效要重新获取
-      if (!target && source) {
-        // 先尝试获取 container
-        const containers = source.pos.findInRange<StructureContainer>(FIND_STRUCTURES, 1, {
+      // 无缓存取container
+      if (!target) {
+        // 找到container,且不属于其它creep的container
+        const container = _.find(creep.room.getStructure(STRUCTURE_CONTAINER), (s =>
+          !creep.room.memory.structure[STRUCTURE_CONTAINER] ||
+          !creep.room.memory.structure[STRUCTURE_CONTAINER][s.id] ||
+          !creep.room.memory.structure[STRUCTURE_CONTAINER][s.id].belong ||
+          creep.room.memory.structure[STRUCTURE_CONTAINER][s.id].belong === creep.id))
+        if (container) {
+          target = Game.getObjectById(container.id as Id<StructureContainer>)
+          creep.room.memory.structure[STRUCTURE_CONTAINER]![container.id].belong = creep.id
+        }
+      }
+      // 再找container工地
+      if (!target) {
+        const constructureSites = source.pos.findInRange(FIND_CONSTRUCTION_SITES, 1, {
           filter: s => s.structureType === STRUCTURE_CONTAINER
         })
-        // 找到了就把 container 当做目标
-        if (containers.length > 0) target = containers[0]
+        if (constructureSites.length > 0) target = constructureSites[0]
       }
-      // 还没找到就找 container 的工地
-      if (!target && source) {
-        const constructionSite = source.pos.findInRange(FIND_CONSTRUCTION_SITES, 1, {
-          filter: s => s.structureType === STRUCTURE_CONTAINER
-        })
-        if (constructionSite.length > 0) target = constructionSite[0]
-      }
-      info(['creepPrepare', 'harvester'], 'target 获取', { target })
-      info(['creepPrepare', 'harvester'], 'source 获取', { source })
-      // 如果还是没找到的话就用 source 当作目标
+      // 还未找到,以source为目标
+      // 这一步为了走到目的地,放下container工地
       if (!target) target = source
-      if (target) {
-        data.targetId = target!.id
-        creep.memory.data = data
-      } else return false
-
-      // 设置移动范围并进行移动（source 走到附近、container 和工地就走到它上面）
+      creep.memory.data = { targetId: target.id, sourceId: source.id } as HarvesterData
       const range = target instanceof Source ? 1 : 0
+      // 移动到指定位置
       creep.goTo(target.pos)
-      info(['creepPrepare', 'harvester'], '到达了位置', 'position', target.pos, range)
-      // 抵达位置了就准备完成
-      if (creep.pos.inRangeTo(target.pos, range)) return true
+      if (creep.pos.inRangeTo(target.pos,range)) return true
       return false
     },
     // 因为 prepare 准备完之后会先执行 source 阶段，所以在这个阶段里对 container 进行维护
@@ -345,6 +335,8 @@ export const roles: {
     // 一直尝试从 container 里获取能量，不过拿到了就走
     source: (creep: Creep): boolean => {
       if (creep.store[RESOURCE_ENERGY] > 0) return true
+      if (!data.sourceId || data.sourceId !== '') {
+      }
       // 获取container
       let source = Game.getObjectById(data.sourceId as Id<StructureContainer | StructureStorage>)
       // container 没能量了就尝试从 storage 里获取能量执行任务
@@ -356,7 +348,8 @@ export const roles: {
     },
     // 维持房间能量填充
     target: (creep: Creep): boolean => {
-      // TODO 这里需要房间物流系统
+      // TODO 这里需要对spwn和extension进行充能
+
       return true
     },
     // 能量来源（container）没了就自觉放弃

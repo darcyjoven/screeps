@@ -193,6 +193,7 @@ interface SourceMemory {
 interface StructureMemory {
   id: string
   pos: RoomPosition
+  belong?: string
 }
 interface RoomMemory {
   // 路径缓存
