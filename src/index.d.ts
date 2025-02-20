@@ -177,7 +177,6 @@ type ShareTask = {
   amount: number
 }
 
-
 // 房间任务
 type RoomTask = {
   center?: CenterTask[]
@@ -185,8 +184,15 @@ type RoomTask = {
   power?: PowerTask[]
   spawn?: SpawnTask[]
 }
+type SourceType = 'source'
 interface SourceMemory {
-  belong?: string
+  id: string
+  pos: RoomPosition
+  belong: string
+}
+interface StructureMemory {
+  id: string
+  pos: RoomPosition
 }
 interface RoomMemory {
   // 路径缓存
@@ -207,7 +213,7 @@ interface RoomMemory {
   // 任务
   task?: RoomTask
   // 状态
-  stat?: {
+  stat: {
     // 房间等级
     rcl?: number
     // 布局等级
@@ -215,14 +221,11 @@ interface RoomMemory {
     currentState: OperationState
     creepConfigs: Partial<Record<CreepRole, number>>
   }
-  // 建筑
-  structure?: {
-    source?: Record<string, SourceMemory>
-    container?: string[]
-  }
-  
-  war?: boolean
-  layout?: {
+  // 建筑 
+  structure: Partial<Record<StructureConstant, Record<string, StructureMemory>>>
+  source: Record<string, SourceMemory>
+  war: boolean
+  layout: {
     center?: { x: number, y: number }
   }
 }
@@ -270,6 +273,8 @@ interface Room {
   planConstruntureSite(level: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8): StructureConstant[] | ScreepsReturnCode
   snapshotLayout(flagName: string): void
   visualizeLayout(level: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8): void
+  getStructure(structureType: StructureConstant, fresh?: boolean): StructureMemory[]
+  getSource(fresh?: boolean): SourceMemory[]
 }
 
 type Colors = 'green' | 'blue' | 'yellow' | 'red'
