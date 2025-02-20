@@ -262,7 +262,7 @@ interface Room {
   stateChange(state: OperationState): void
   clearHostileStructures(): OK | ERR_NOT_FOUND
   setCenter(flagName: string): OK | ERR_NOT_FOUND
-  findOptimalCenter(): RoomPosition[]
+  findOptimalCenter(cnt?: number, visual?: boolean): RoomPosition[]
   planConstruntureSite(level: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8): StructureConstant[] | ScreepsReturnCode
   snapshotLayout(flagName: string): void
   visualizeLayout(level: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8): void

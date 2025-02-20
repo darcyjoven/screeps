@@ -39,7 +39,7 @@ export default class LayoutExtension extends RoomExtension {
     /**
      * 动态设置最佳中心点
      */
-    public findOptimalCenter(): RoomPosition[] {
+    public findOptimalCenter(cnt: number = 10, visual: boolean = false): RoomPosition[] {
         // 取得清单
         const sources = this.find(FIND_SOURCES)
         const minerals = this.find(FIND_MINERALS)
@@ -94,9 +94,9 @@ export default class LayoutExtension extends RoomExtension {
         candidates.sort((a, b) =>
             a.swamps - b.swamps || a.dist - b.dist
         )
-        return candidates.slice(0, 10).map(c => {
+        return candidates.slice(0, cnt).map(c => {
             // 画圈
-            this.visual.circle(c.x, c.y, { radius: 0.4, fill: '#00FF00' })
+            if (visual) this.visual.circle(c.x, c.y, { radius: 0.4, fill: '#00FF00' })
             return new RoomPosition(c.x, c.y, this.name)
         }
         )
@@ -137,7 +137,7 @@ export default class LayoutExtension extends RoomExtension {
         }
         if (info !== '') {
             info = `以下是需要手动部署的建筑:\n` + info
-            this.log(info,'new constructure site failed','red',true)
+            this.log(info, 'new constructure site failed', 'red', true)
         }
         return sites
     }

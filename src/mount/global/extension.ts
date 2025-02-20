@@ -7,7 +7,34 @@ export default {
     get(id: string): any {
         return Game.getObjectById(id)
     },
+    /**
+     * 获取房间中心点位
+     * @param roomName 
+     * @param cnt 
+     * @param visual 
+     * @returns 
+     */
+    suggestCenterPos(roomName: string, cnt: number = 10, visual: boolean = false): string {
+        let result = ''
+        if (!Game.rooms[roomName]) return '房间不存在，或无视野'
 
+        const poss = Game.rooms[roomName].findOptimalCenter(cnt, visual)
+        poss.forEach((v, i) => {
+            result += ` idx:${i + 1},{x:${v.x}y:${v.y}} \n`
+        })
+        if (result === '') return '未找到合适的中心点'
+        result = '以下是合适的中心点位置:\n' + result
+        return result
+    },
+    /**
+     * 清除房间内视图
+     * @param roomName 
+     */
+    clearVisual(roomName:string):boolean{
+        if (!Game.rooms[roomName]) return false
+        Game.rooms[roomName].visual.clear()
+        return true
+    },
     /**
      * 查询指定资源在各个房间中的数量
      * 
