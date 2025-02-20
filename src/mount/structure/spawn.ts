@@ -66,7 +66,7 @@ export default class SpawnExtension extends StructureSpawn {
         const spawnTask = this.room.nextSpawnTask()
         if (!spawnTask) return
 
-        const name = `${this.name}/${spawnTask}/${generateCreepId()}`
+        const name = `${this.room.name}/${spawnTask}/${generateCreepId()}`
         const body = getBodyConfig(spawnTask, this.room.controller?.level || 1)
         const result = this.spawnCreep(body, name, {
             memory: {

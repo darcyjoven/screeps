@@ -452,6 +452,7 @@ export default class CreepExtension extends Creep {
     ) {
       // 查看是否有缓存路径      
       const routeKey = `${serializePos(this.pos), serializePos(target)}`
+      if (!this.room.memory.routeCache) this.room.memory.routeCache = {}
       let route = this.room.memory.routeCache[routeKey]
       if (!route || !route.path) {
         route = { path: '', lastUsed: 0 }
