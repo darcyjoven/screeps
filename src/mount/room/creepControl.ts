@@ -75,7 +75,7 @@ export default class CreepControl extends ConfigExtension {
 
         // 重新设置孵化任务
         // 清空孵化任务
-        this.memory.spawnList = []
+        if (this.memory.task) this.memory.task.spawn = []
         let newConfig = _.cloneDeep(this.memory.stat.creepConfigs)
         // 遍历现存的Creep
         this.find(FIND_MY_CREEPS).forEach(creep => {
@@ -138,6 +138,27 @@ export default class CreepControl extends ConfigExtension {
         if (cnt > ((this.memory.stat.currentState as Partial<Record<CreepRole, number>>)[role] || 0)) return false
         return false
     }
+    /**
+     * 发布建造者
+     * 
+     * 如果存在工地，但是creep和task数量不满足当前配置，则增加孵化任务
+     * 
+     * 此函数应该有room.work调用
+     */
+    public releaseBuilder(): void {
+        const constructureSites = this.find(FIND_MY_CONSTRUCTION_SITES)
+        // 有工地
+        if (constructureSites && constructureSites.length > 0) {
+            // 获得配置Builder数量
+            let cnt = stateControls[this.memory.stat?.currentState || 'claim'].Builder || 0
+            if (cnt <= 0) return
+            cnt -= this.find(FIND_MY_CREEPS, { filter: c => c.memory.role === 'Builder' }).length
+            if (cnt <= 0) return
+            cnt -= this.memory.task?.spawn?.filter(s => s === 'Builder').length || 0
+            if (cnt <= 0) return
+            this.addSpawnTask(false, ...(new Array(cnt).fill('Builder')))
+        }
+    }
 }
 
 const stateControls: Record<OperationState, Partial<Record<CreepRole, number>>> = {
@@ -173,7 +194,7 @@ const stateControls: Record<OperationState, Partial<Record<CreepRole, number>>> 
  * @param room 
  * @returns 
  */
-const getCurrentState = (room: Room): OperationState => {
+export const getCurrentState = (room: Room): OperationState => {
     if (!room.controller) return 'claim'
 
     if (room.controller.level >= 5) {

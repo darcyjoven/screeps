@@ -189,7 +189,6 @@ interface SourceMemory {
   belong?: string
 }
 interface RoomMemory {
-  spawnList: CreepRole[] // 孵化清单
   // 路径缓存
   routeCache: {
     // 键为路径的起点和终点名，例如："12/32/W1N1 23/12/W2N2"，值是使用 Creep.serializeFarPath 序列化后的路径
@@ -208,6 +207,10 @@ interface RoomMemory {
   // 任务
   task?: RoomTask
   stat?: {
+    // 房间等级
+    rcl?: number
+    // 布局等级
+    layout?: number
     currentState: OperationState
     creepConfigs: Partial<Record<CreepRole, number>>
   }
@@ -215,6 +218,9 @@ interface RoomMemory {
     source?: Record<string, SourceMemory>
   }
   war?: boolean
+  layout?: {
+    center?: { x: number, y: number }
+  }
 }
 interface SpawnMemory {
   belong?: string | null
@@ -232,7 +238,7 @@ interface Room {
   sourceContainers: StructureContainer[]
   getAvoidPos(): { [creepName: string]: string }
   getAvailableSource(): StructureTerminal | StructureStorage | StructureContainer | Source
-  log(content: string, instanceName: string, color: Colors, notify: boolean): void
+  log(content: string, instanceName?: string, color?: Colors, notify?: boolean): void
   // 敌人缓存
   _enemys: Creep[]
   registerContainer(structure: StructureContainer): void
@@ -254,10 +260,10 @@ interface Room {
   finishShareTask(): void
   needSpawn(role: CreepRole): boolean
   stateChange(state: OperationState): void
-  clearHostileStructures(): OK | ERR_NOT_FOUND 
-  setCenter(flagName: string): RoomPosition | undefined
+  clearHostileStructures(): OK | ERR_NOT_FOUND
+  setCenter(flagName: string): OK | ERR_NOT_FOUND
   findOptimalCenter(): RoomPosition[]
-  planConstruntureSite(level: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8): ConstructionSite[]
+  planConstruntureSite(level: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8): StructureConstant[] | ScreepsReturnCode
   snapshotLayout(flagName: string): void
   visualizeLayout(level: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8): void
 }
@@ -372,6 +378,14 @@ type BaseLayout = {
     [structureType in StructureConstant]?: ([number, number] | null)[]
   }
 }
+
+type PlanToolData = {
+  rcl: number
+  buildings: {
+    [structureType in StructureConstant]?: { x: number, y: number }[]
+  }
+}
+
 
 interface Structure {
   my?: boolean

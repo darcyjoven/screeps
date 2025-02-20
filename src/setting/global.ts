@@ -96,3 +96,8 @@ export const TASK_LABOUT = 'LabOut'
 export const TASK_BOOSTGETRESOURCE = 'BoostGetResource'
 export const TASK_BOOSTGETENERGY = 'BoostGetEnergy'
 export const TASK_BOOSTCLEAR = 'BoostClear'
+
+/**
+ * 物流任务要求的最小剩余存活tick
+ */
+export const TRANSFER_DEATH_LIMIT = 20
