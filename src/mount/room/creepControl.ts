@@ -141,24 +141,24 @@ export default class CreepControl extends ConfigExtension {
 }
 
 const stateControls: Record<OperationState, Partial<Record<CreepRole, number>>> = {
-    link: {
+    claim: {
         Harvester: 2,
         Builder: 1,
     },
-    storage: {
+    container: {
         Harvester: 2,
         Builder: 1,
         Filler: 2,
         Upgrader: 4,
     },
-    container: {
+    storage: {
         Harvester: 2,
         Builder: 2,
         Filler: 2,
         Upgrader: 6,
         Manager: 1,
     },
-    claim: {
+    link: {
         Collector: 2,
         Builder: 2,
         Filler: 2,
