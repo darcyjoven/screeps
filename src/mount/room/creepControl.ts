@@ -1,6 +1,5 @@
 import { creepDefaultMemory } from "setting/creep";
 import ConfigExtension from "./config";
-import { info } from "utils/terminal";
 
 export default class CreepControl extends ConfigExtension {
     /**
@@ -10,12 +9,11 @@ export default class CreepControl extends ConfigExtension {
      * 
      */
     public creepNumberControl(): void {
-        info(['roomMount', 'creepControl'], '房间creep数量控制')
         // 进行初始化
-        if (!this.memory.stat) {
-            info(['roomMount', 'creepControl'], '房间creep数量控制', '初始化配置参数')
+        if (!this.memory.stat || (this.memory.stat.currentState === 'claim' &&
+            _.size(Game.creeps) === 0 && !this.nextSpawnTask()
+        )) {
             const state = getCurrentState(this)
-            info(['roomMount', 'creepControl'], '判断当前阶段', state)
             this.stateChange(state)
         }
     }
@@ -35,7 +33,6 @@ export default class CreepControl extends ConfigExtension {
             currentState: state,
             creepConfigs: stateControls[state]
         }
-        info(['roomMount', 'stateChange'], '阶段转换', 'old', oldConfig, 'new', this.memory.stat)
 
         // 重新设置孵化任务
         // 清空孵化任务
@@ -48,7 +45,6 @@ export default class CreepControl extends ConfigExtension {
                 // 处理旧配置逻辑,如果旧配置中有这个角色，且数量大于0，则不需要孵化
                 if (!!oldConfig[role] && oldConfig[role]! > 0) {
                     creep.memory.noNeed = true
-                    info(['roomMount', 'stateChange'], '不再需要孵化', 'name', creep.name)
                 }
                 return
             }
@@ -57,12 +53,10 @@ export default class CreepControl extends ConfigExtension {
                 // 如果数量小于0,表示数量超过配置,也需要比较旧配置
                 if (!!oldConfig[role] && oldConfig[role]! > 0) {
                     creep.memory.noNeed = true
-                    info(['roomMount', 'stateChange'], '不再需要孵化', 'name', creep.name)
                 }
                 newConfig[role] = 0
             }
         })
-        info(['roomMount', 'stateChange'], '加入孵化队列', 'task', newConfig)
         // 将剩余数量加入孵化任务
         for (const role in newConfig) {
             for (let i = 0; i < newConfig[role as CreepRole]!; i++) {
@@ -187,4 +181,3 @@ export const getCurrentState = (room: Room): OperationState => {
     else return 'claim'
 }
 
- 

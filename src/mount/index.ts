@@ -21,13 +21,13 @@ export default () => {
  */
 const memoryInit = () => {
     for (const name in Game.rooms) {
-        if (Game.rooms[name].memory.routeCache) Game.rooms[name].memory.routeCache = {}
-        if (Game.rooms[name].memory.task) Game.rooms[name].memory.task = {}
-        if (Game.rooms[name].memory.stat) Game.rooms[name].memory.stat = { currentState: 'claim', creepConfigs: {} }
-        if (Game.rooms[name].memory.structure) Game.rooms[name].memory.structure = {}
-        if (Game.rooms[name].memory.source) Game.rooms[name].memory.source = {}
-        if (Game.rooms[name].memory.war) Game.rooms[name].memory.war = false
-        if (Game.rooms[name].memory.layout) Game.rooms[name].memory.layout = {}
-        if (Game.rooms[name].memory.processor) Game.rooms[name].memory.processor = { x: 0, y: 0 }
+        if (!Game.rooms[name].memory.routeCache) Game.rooms[name].memory.routeCache = {}
+        if (!Game.rooms[name].memory.task) Game.rooms[name].memory.task = {}
+        if (!Game.rooms[name].memory.stat) Game.rooms[name].memory.stat = { currentState: 'claim', creepConfigs: {} }
+        if (!Game.rooms[name].memory.structure) Game.rooms[name].memory.structure = {}
+        if (!Game.rooms[name].memory.source) Game.rooms[name].memory.source = {}
+        if (!Game.rooms[name].memory.war) Game.rooms[name].memory.war = false
+        if (!Game.rooms[name].memory.layout) Game.rooms[name].memory.layout = {}
+        if (!Game.rooms[name].memory.processor) Game.rooms[name].memory.processor = { x: 0, y: 0 }
     }
 }

@@ -207,17 +207,10 @@ export function createLink(content: string, url: string, newTab: boolean = true)
 }
 
 const infoShow: Record<string, boolean> = {
-    'creepNumberControl': false,
-    'creepWork': false,
-    'creepPrepare': false,
-    'creepSource': true,
-    'harvester': true,
-    'roomTask': false,
-    'spawn': false,
-    'main': false,
-    'creepMount': false,
-    'goTo': false,
-    'dash': false,
+    main: false,
+    creep: false,
+    room: false,
+    spawn: false,
 }
 /**
  * 输出debug信息

@@ -1,7 +1,6 @@
 import { dashRange, stanbyRange, minWallHits } from "setting/global"
 import { unserializePos, getSurroundingPos, serializePos, getOppositeDirection } from "utils/path"
 import roles from "creep"
-import { info } from "utils/terminal"
 
 // creep 原型拓展
 export default class CreepExtension extends Creep {
@@ -9,10 +8,9 @@ export default class CreepExtension extends Creep {
    * 主要工作
    */
   public work(): void {
-    info(['creepMount', 'creepWork'], 'work 开始', 'role', this.memory.role, 'name', this.name,)
     // 检查角色正确否
     if (!(this.memory.role in roles)) {
-      this.log(`找不到对应的 creepConfig`, 'yellow')
+      this.log(`未知角色`, 'yellow')
       this.say(`凉了，role:${this.memory.role}`)
       return
     }
@@ -41,30 +39,25 @@ export default class CreepExtension extends Creep {
         return
       }
     }
-    info(['creepMount', 'creepWork'], 'prepare', this.memory.ready)
+
     // 还未准备好
     if (!this.memory.ready) {
       if (creepConfig.prepare) this.memory.ready = creepConfig.prepare(this)
       else this.memory.ready = true
     }
-    info(['creepMount', 'creepWork'], 'after prepare', this.memory.ready)
     // 还未准备就继续下一个tick
     if (!this.memory.ready) return
     // 获取是否有工作
-    info(['creepMount', 'creepWork'], 'working', this.memory.working)
     const working = creepConfig.source ? this.memory.working : true
     let stateChange = false
     // 执行阶段 
     if (working) {
       const ok = creepConfig.target && creepConfig.target(this)
-      info(['creepMount', 'creepWork'], 'target执行结果', ok)
       if (ok) stateChange = true
     } else {
       const ok = creepConfig.source && creepConfig.source(this)
-      info(['creepMount', 'creepWork'], 'source执行结果', ok)
       if (ok) stateChange = true
     }
-    info(['creepMount', 'creepWork'], 'stateChange', stateChange, '是否工作位置')
     // 状态变化了就释放工作位置
     if (stateChange) {
       this.memory.working = !this.memory.working
@@ -435,7 +428,6 @@ export default class CreepExtension extends Creep {
    */
   // CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND;
   public dash(target: RoomPosition): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND {
-    info(['creepMount', 'dash'], 'target', target)
     const result = this.moveTo(target, {
       visualizePathStyle: {
         fill: 'transparent',
@@ -447,7 +439,6 @@ export default class CreepExtension extends Creep {
       ignoreCreeps: true,
       swampCost: 8,
     })
-    info(['creepMount', 'dash'], 'result', result)
     return result
   }
   /**
@@ -563,8 +554,7 @@ export default class CreepExtension extends Creep {
   }
 
   public goTo(target: RoomPosition): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND {
-    info(['creepMount', 'goTo'], 'name', this.name, 'target', { target }, '------- 开始 -------')
-    info(['creepMount', 'goTo'], 'goCache', this.memory.goCache, 'move', this.memory.move)
+
     // 继续按照缓存走
     if (this.memory.goCache && !this.memory.move && this.memory.move!.targetPos === serializePos(target)) return this.goByCache()
 
@@ -572,15 +562,11 @@ export default class CreepExtension extends Creep {
       x: this.pos.x,
       y: this.pos.y
     }
-    info(['creepMount', 'goTo'], 'from', fromPos)
-    info(['creepMount', 'goTo'], 'stanBy', this.room.memory.standBy)
     // 距离standby一个格子内，从standby开始计算初始位置
     if (this.room.memory.standBy) if (this.pos.inRangeTo(this.room.memory.standBy.x, this.room.memory.standBy.y, 1)) fromPos = this.room.memory.standBy
-    info(['creepMount', 'goTo'], 'fromRoom', this.room, 'toRoom', target.roomName)
     // 跨房间
     if (this.room.name !== target.roomName) return this.marathon(target)
     // 距离超过1/4，要去缓存路径
-    info(['creepMount', 'goTo'], '距离', target.getRangeTo(fromPos.x, fromPos.y), 'dash 距离', dashRange)
     return target.getRangeTo(fromPos.x, fromPos.y) > dashRange ? this.race(target) : this.dash(target)
   }
   public goByCache(): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND {

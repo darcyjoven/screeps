@@ -68,10 +68,10 @@ export default class SearchExtension extends LayoutExtension {
             // 将结果中不存在于内存中的加入到内存
             sources.forEach(s => {
                 if (!this.memory.source[s.id]) this.memory.source[s.id] = { id: s.id, pos: s.pos, belong: '' }
-            })
+            })        
             // 将内存中存在结果中不存在的删除内存
             _.keys(this.memory.source).forEach(id => {
-                if (_.some(sources, source => source.id !== id)) delete this.memory.source[id]
+                if (!_.some(sources, source => source.id !== id)) delete this.memory.source[id]
             })
         }
         return _.values(this.memory.source)

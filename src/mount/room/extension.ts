@@ -1,9 +1,7 @@
 import creepControl from "./creepControl";
-import { info } from "utils/terminal";
 
 export default class RoomExtension extends creepControl {
     public work(): void {
-        info(['roomMount', 'creepControl'], 'room', this.name, 'creep 数量控制 开始 ------ ------')
         // 判断container建立完成
         this.toContianerState()
         // creep运维数量控制

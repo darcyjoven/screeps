@@ -66,7 +66,7 @@ export default class SpawnExtension extends StructureSpawn {
         const spawnTask = this.room.nextSpawnTask()
         if (!spawnTask) return
 
-        const name = `${this.room.name}/${spawnTask}/${generateCreepId()}`
+        const name = `${this.room.name}/${spawnTask.role}/${generateCreepId()}`
         const body = getBodyConfig(spawnTask.role, this.room.controller?.level || 1)
         const result = this.spawnCreep(body, name, { memory: spawnTask.memory })
         // 如果能量不足将当前任务放到最后
