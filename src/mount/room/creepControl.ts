@@ -1,3 +1,4 @@
+import { creepDefaultMemory } from "setting/creep";
 import ConfigExtension from "./config";
 import { info } from "utils/terminal";
 
@@ -17,43 +18,6 @@ export default class CreepControl extends ConfigExtension {
             info(['roomMount', 'creepControl'], '判断当前阶段', state)
             this.stateChange(state)
         }
-        // 获取可以使用的spawn
-        // const spawns = this.find(FIND_MY_SPAWNS, {
-        //     filter: s => s.canLend('creepControl')
-        // })
-
-        // 没有可用的spawn，不需要孵化
-        // info(['roomMount', 'creepControl'], '寻找可以使用的spawn:', spawns.length)
-        // if (spawns.length <= 0) return
-        // // 没有任务，不需要孵化
-        // if (!this.nextSpawnTask()) {
-        //     info(['roomMount', 'creepControl'], '无spawn任务')
-        //     return
-        // }
-
-        // 开始孵化
-        // 不进行孵化，spawn自主进行孵化
-        // for (const spawn of spawns) {
-        //     const task = this.nextSpawnTask()
-        //     if (!task) break // 断言
-        //     if (!spawn.lend('creepControl')) {
-        //         info(['roomMount', 'creepControl'], 'spawn不可借用', 'name', spawn.name)
-        //         return
-        //     }
-        //     const name = `${this.name}/${task}/${generateCreepId()}`
-        //     const body = getBodyConfig(task, this.controller?.level || 1)
-        //     const reulst = spawn.spawnCreep(body, name, {
-        //         memory: {
-        //             role: task, crossable: false, standed: false, ready: false,
-        //             isStandBy: false, isStand: false, data: {}, goCache: false, working: false
-        //         }
-        //     })
-        //     info(['roomMount', 'creepControl'], 'SpawnCreep', 'name', name, 'body', body, 'result', reulst)
-        //     if (reulst === OK) {
-        //         // 孵化成功
-        //         this.finishSpawnTask()
-        //     }
-        // }
     }
     /**
      * 阶段转换
@@ -102,7 +66,11 @@ export default class CreepControl extends ConfigExtension {
         // 将剩余数量加入孵化任务
         for (const role in newConfig) {
             for (let i = 0; i < newConfig[role as CreepRole]!; i++) {
-                this.addSpawnTask(false, role as CreepRole)
+                this.addSpawnTask(false, {
+                    role: role as CreepRole,
+                    name: "",
+                    memory: creepDefaultMemory[role as CreepRole]
+                })
             }
         }
     }
@@ -132,7 +100,7 @@ export default class CreepControl extends ConfigExtension {
             filter: s => s.memory.role === role
         }).length
         // 孵化队列
-        cnt += _.filter(this.memory.task?.spawn || [], t => t === role).length
+        cnt += _.filter(this.memory.task?.spawn || [], t => t.role === role).length
         if (!this.memory.stat) return false
         // 如果大于配置的数量，不需要孵化
         if (cnt > ((this.memory.stat.currentState as Partial<Record<CreepRole, number>>)[role] || 0)) return false
@@ -154,7 +122,7 @@ export default class CreepControl extends ConfigExtension {
             if (cnt <= 0) return
             cnt -= this.find(FIND_MY_CREEPS, { filter: c => c.memory.role === 'Builder' }).length
             if (cnt <= 0) return
-            cnt -= this.memory.task?.spawn?.filter(s => s === 'Builder').length || 0
+            cnt -= this.memory.task?.spawn?.filter(s => s.role === 'Builder').length || 0
             if (cnt <= 0) return
             this.addSpawnTask(false, ...(new Array(cnt).fill('Builder')))
         }
@@ -218,3 +186,5 @@ export const getCurrentState = (room: Room): OperationState => {
     if (containers && containers.length >= 2) return 'container'
     else return 'claim'
 }
+
+ 

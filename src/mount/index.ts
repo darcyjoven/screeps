@@ -15,7 +15,7 @@ export default () => {
         global.hasExtension = true
     }
 }
- 
+
 /**
  * memory 初始化
  */
@@ -28,5 +28,6 @@ const memoryInit = () => {
         if (Game.rooms[name].memory.source) Game.rooms[name].memory.source = {}
         if (Game.rooms[name].memory.war) Game.rooms[name].memory.war = false
         if (Game.rooms[name].memory.layout) Game.rooms[name].memory.layout = {}
+        if (Game.rooms[name].memory.processor) Game.rooms[name].memory.processor = { x: 0, y: 0 }
     }
 }

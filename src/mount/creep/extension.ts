@@ -21,15 +21,26 @@ export default class CreepExtension extends Creep {
       // if (this.ticksToLive === CREEP_LIFE_TIME) this._id = this.id // 解决 this creep not exist 问题
       return
     }
+    // 获取creep的配置
+    const creepConfig: CreepCycle = roles[this.memory.role as CreepRole](this.memory.data)
 
     // 快死的时候处理
     if (this.ticksToLive && this.ticksToLive <= 3) {
       // 释放出禁止通行点
       if (this.memory.isStand) this.room.rmAvoidPos(this.name)
+      if (creepConfig.isNeed && creepConfig.isNeed(this)) {
+        // 需要需要重新孵化，就立即自杀重新孵化
+        this.memory.ready = false
+        this.room.addSpawnTask(false, {
+          role: this.memory.role,
+          name: this.name,
+          memory: this.memory
+        })
+        this.say('🔄我重生去了')
+        this.suicide()
+        return
+      }
     }
-    // 获取creep的配置
-    const creepConfig: CreepCycle = roles[this.memory.role as CreepRole](this.memory.data)
-
     info(['creepMount', 'creepWork'], 'prepare', this.memory.ready)
     // 还未准备好
     if (!this.memory.ready) {

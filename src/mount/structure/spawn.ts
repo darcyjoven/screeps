@@ -3,7 +3,7 @@ import { generateCreepId } from "utils/tool"
 import { TASK_EXTENSION } from "setting/global"
 
 export default class SpawnExtension extends StructureSpawn {
-    public work(): void { 
+    public work(): void {
         this.needEnergy()
         this.doSpawnTask()
     }
@@ -67,13 +67,8 @@ export default class SpawnExtension extends StructureSpawn {
         if (!spawnTask) return
 
         const name = `${this.room.name}/${spawnTask}/${generateCreepId()}`
-        const body = getBodyConfig(spawnTask, this.room.controller?.level || 1)
-        const result = this.spawnCreep(body, name, {
-            memory: {
-                role: spawnTask, crossable: false, standed: false, ready: false,
-                isStandBy: false, isStand: false, data: {}, goCache: false, working: false
-            }
-        })
+        const body = getBodyConfig(spawnTask.role, this.room.controller?.level || 1)
+        const result = this.spawnCreep(body, name, { memory: spawnTask.memory })
         // 如果能量不足将当前任务放到最后
         if (result === OK) this.room.finishSpawnTask()
         else if (result === ERR_NOT_ENOUGH_ENERGY) {

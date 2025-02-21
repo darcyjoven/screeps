@@ -145,7 +145,7 @@ const bodyConfigs: BodyConfig = {
  * @param controllerLevel 控制器等级
  * @returns 返回身体构造
  */
-export function getBodyConfig(role: CreepRole, controllerLevel: number): BodyPartConstant[]  {
+export function getBodyConfig(role: CreepRole, controllerLevel: number): BodyPartConstant[] {
   for (const [bodyRole, roles] of Object.entries(bodyRoleMap)) {
     if (roles.includes(role)) {
       const levelConfig = bodyConfigs[bodyRole as BodyConfigRole];
@@ -159,3 +159,193 @@ export function getBodyConfig(role: CreepRole, controllerLevel: number): BodyPar
   return []; // 未找到匹配的身体配置
 }
 
+
+export const creepDefaultMemory: Record<CreepRole, CreepMemory> = {
+  RemoteHauler: {
+    crossable: false,
+    standed: false,
+    role: "RemoteHauler",
+    ready: false,
+    isStandBy: false,
+    isStand: false,
+    data: {},
+    goCache: false,
+    working: false
+  },
+  Harvester: {
+    crossable: false,
+    standed: false,
+    role: "Harvester",
+    ready: false,
+    isStandBy: false,
+    isStand: false,
+    data: {},
+    goCache: false,
+    working: false
+  },
+  Worker: {
+    crossable: false,
+    standed: false,
+    role: "Worker",
+    ready: false,
+    isStandBy: false,
+    isStand: false,
+    data: {},
+    goCache: false,
+    working: false
+  },
+  Hauler: {
+    crossable: false,
+    standed: false,
+    role: "Hauler",
+    ready: false,
+    isStandBy: false,
+    isStand: false,
+    data: {},
+    goCache: false,
+    working: false
+  },
+  Collector: {
+    crossable: false,
+    standed: false,
+    role: "Collector",
+    ready: false,
+    isStandBy: false,
+    isStand: false,
+    data: {},
+    goCache: false,
+    working: false
+  },
+  Upgrader: {
+    crossable: false,
+    standed: false,
+    role: "Upgrader",
+    ready: false,
+    isStandBy: false,
+    isStand: false,
+    data: {},
+    goCache: false,
+    working: false
+  },
+  Builder: {
+    crossable: false,
+    standed: false,
+    role: "Builder",
+    ready: false,
+    isStandBy: false,
+    isStand: false,
+    data: {},
+    goCache: false,
+    working: false
+  },
+  Filler: {
+    crossable: false,
+    standed: false,
+    role: "Filler",
+    ready: false,
+    isStandBy: false,
+    isStand: false,
+    data: {},
+    goCache: false,
+    working: false
+  },
+  Processor: {
+    crossable: false,
+    standed: false,
+    role: "Processor",
+    ready: false,
+    isStandBy: false,
+    isStand: false,
+    data: {},
+    goCache: false,
+    working: false
+  },
+  Manager: {
+    crossable: false,
+    standed: false,
+    role: "Manager",
+    ready: false,
+    isStandBy: false,
+    isStand: false,
+    data: {},
+    goCache: false,
+    working: false
+  },
+  Defender: {
+    crossable: false,
+    standed: false,
+    role: "Defender",
+    ready: false,
+    isStandBy: false,
+    isStand: false,
+    data: {},
+    goCache: false,
+    working: false
+  },
+  Ranged: {
+    crossable: false,
+    standed: false,
+    role: "Ranged",
+    ready: false,
+    isStandBy: false,
+    isStand: false,
+    data: {},
+    goCache: false,
+    working: false
+  },
+  Healer: {
+    crossable: false,
+    standed: false,
+    role: "Healer",
+    ready: false,
+    isStandBy: false,
+    isStand: false,
+    data: {},
+    goCache: false,
+    working: false
+  },
+  RemoteHarvester: {
+    crossable: false,
+    standed: false,
+    role: "RemoteHarvester",
+    ready: false,
+    isStandBy: false,
+    isStand: false,
+    data: {},
+    goCache: false,
+    working: false
+  },
+  RemoteDefender: {
+    crossable: false,
+    standed: false,
+    role: "RemoteDefender",
+    ready: false,
+    isStandBy: false,
+    isStand: false,
+    data: {},
+    goCache: false,
+    working: false
+  },
+  Claimer: {
+    crossable: false,
+    standed: false,
+    role: "Claimer",
+    ready: false,
+    isStandBy: false,
+    isStand: false,
+    data: {},
+    goCache: false,
+    working: false
+  },
+  Dismantler: {
+    crossable: false,
+    standed: false,
+    role: "Dismantler",
+    ready: false,
+    isStandBy: false,
+    isStand: false,
+    data: {},
+    goCache: false,
+    working: false
+  }
+}

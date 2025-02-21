@@ -113,6 +113,8 @@ interface CreepMemory {
   constructionSiteId?: string
   // 要刷的墙的ID
   fillWallId?: string
+  // 填充的建筑ID
+  fillStructureId?: string
 }
 
 interface FlagMemory { }
@@ -167,7 +169,11 @@ interface BootClear extends ExtensionFill { }
 // 能量请求任务
 type PowerTask = PowerConstant
 // 孵化任务
-type SpawnTask = CreepRole
+type SpawnTask = {
+  role: CreepRole
+  name: string
+  memory: CreepMemory
+}
 
 // 不同房间共享任务
 type ShareTask = {
@@ -212,7 +218,7 @@ interface RoomMemory {
   // 建筑工地相关
   buildStructure?: BuildStructure
   // 任务
-  task?: RoomTask
+  task: RoomTask
   // 状态
   stat: {
     // 房间等级
@@ -229,6 +235,8 @@ interface RoomMemory {
   layout: {
     center?: { x: number, y: number }
   }
+  //Processor 待命位置
+  processor: ProcessorData
 }
 interface SpawnMemory {
   belong?: string | null
@@ -264,6 +272,7 @@ interface Room {
   finishSpawnTask(): void
   finishCenterTask(): void
   finishTransferTask(): void
+  finishTransferTaskBy<T extends TransferTask>(taskType: T['type']): void
   finishPowerTask(): void
   finishShareTask(): void
   needSpawn(role: CreepRole): boolean
@@ -399,4 +408,13 @@ type PlanToolData = {
 
 interface Structure {
   my?: boolean
+}
+/**
+ * 房间物流任务执行逻辑
+ */
+interface TransferTaskOperation {
+  // creep 工作时执行的方法
+  target: (creep: Creep, task: TransferTask) => boolean
+  // creep 非工作(收集资源时)执行的方法
+  source: (creep: Creep, task: TransferTask, sourceId: string) => boolean
 }

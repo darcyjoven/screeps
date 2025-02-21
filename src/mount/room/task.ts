@@ -33,7 +33,6 @@ export default class TaskExtension extends SearchExtension {
 		return addShareTask(emergency, ...task)
 	}
 	public nextSpawnTask(): SpawnTask | undefined {
-		if (!this.memory.task) return
 		if (!this.memory.task.spawn) return
 		if (this.memory.task.spawn.length === 0) return
 		else {
@@ -42,14 +41,12 @@ export default class TaskExtension extends SearchExtension {
 		}
 	}
 	public finishSpawnTask() {
-		if (!this.memory.task) return
 		if (!this.memory.task.spawn) return
 		info(['roomTask', 'spawn'], 'finish', 'length', this.memory.task.spawn)
 		this.memory.task.spawn.shift()
 		info(['roomTask', 'spawn'], 'finish', 'length', this.memory.task.spawn)
 	}
 	public nextCenterTask(): CenterTask | undefined {
-		if (!this.memory.task) return
 		if (!this.memory.task.center) return
 		if (this.memory.task.center.length === 0) return
 		else {
@@ -58,12 +55,10 @@ export default class TaskExtension extends SearchExtension {
 		}
 	}
 	public finishCenterTask() {
-		if (!this.memory.task) return
 		if (!this.memory.task.center) return
 		this.memory.task.center.shift()
 	}
 	public nextTransferTask(): TransferTask | undefined {
-		if (!this.memory.task) return
 		if (!this.memory.task.transfer) return
 		if (this.memory.task.transfer.length === 0) return
 		else {
@@ -75,7 +70,6 @@ export default class TaskExtension extends SearchExtension {
 	 * 寻找指定类型的Transfer任务
 	 */
 	public nextTransferTaskBy<T extends TransferTask>(taskType: T['type']): T | undefined {
-		if (!this.memory.task) return
 		if (!this.memory.task.transfer) return
 		if (this.memory.task.transfer.length === 0) return
 		else {
@@ -83,12 +77,17 @@ export default class TaskExtension extends SearchExtension {
 		}
 	}
 	public finishTransferTask() {
-		if (!this.memory.task) return
 		if (!this.memory.task.transfer) return
 		this.memory.task.transfer.shift()
 	}
+	public finishTransferTaskBy<T extends TransferTask>(taskType: T['type']) {
+		if (!this.memory.task.transfer) return
+		const idx = _.findIndex(this.memory.task.transfer, t => t.type === taskType)
+		if (idx !== -1) {
+			this.memory.task.transfer.splice(idx, 1)
+		}
+	}
 	public nextPowerTask(): PowerTask | undefined {
-		if (!this.memory.task) return
 		if (!this.memory.task.power) return
 		if (this.memory.task.power.length === 0) return
 		else {
@@ -97,7 +96,6 @@ export default class TaskExtension extends SearchExtension {
 		}
 	}
 	public finishPowerTask() {
-		if (!this.memory.task) return
 		if (!this.memory.task.power) return
 		this.memory.task.power.shift()
 	}
