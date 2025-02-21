@@ -1,3 +1,4 @@
+import { creepDefaultMemory, creepRoles } from "setting/creep"
 import SearchExtension from "./search"
 
 /**
@@ -9,6 +10,20 @@ export default class TaskExtension extends SearchExtension {
         if (!this.memory.task.spawn) this.memory.task.spawn = [...role]
         else emergency ? this.memory.task.spawn.unshift(...role) : this.memory.task.spawn.push(...role)
         return OK
+    }
+    public addSpawn(role: CreepRole): string {
+        if (!_.includes(creepRoles,role)) {
+            return `角色不在${JSON.stringify(creepRoles)}中`
+        }
+        const task: SpawnTask = {
+            role: role,
+            name: "",
+            memory: creepDefaultMemory[role]
+        }
+        if (!this.memory.task) this.memory.task = {}
+        if (!this.memory.task.spawn) this.memory.task.spawn = [task]
+        else this.memory.task.spawn.push(task)
+        return '已添加孵化任务'
     }
     public addCenterTask(emergency: boolean = false, ...task: CenterTask[]): OK | ERR_NAME_EXISTS | ERR_INVALID_TARGET {
         if (!this.memory.task) this.memory.task = {}

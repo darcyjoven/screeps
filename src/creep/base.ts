@@ -28,6 +28,7 @@ export const roles: {
                 // 找到不属于其它creep的source
                 const sourceFind = _.find(creep.room.getSource(true), (s =>
                     !creep.room.memory.source[s.id] ||
+                    creep.room.memory.source[s.id].belong === '' ||
                     creep.room.memory.source[s.id].belong === creep.name
                 ))
                 if (sourceFind) {
@@ -47,7 +48,9 @@ export const roles: {
                     !creep.room.memory.structure[STRUCTURE_CONTAINER] ||
                     !creep.room.memory.structure[STRUCTURE_CONTAINER][s.id] ||
                     !creep.room.memory.structure[STRUCTURE_CONTAINER][s.id].belong ||
-                    creep.room.memory.structure[STRUCTURE_CONTAINER][s.id].belong === creep.id))
+                    creep.room.memory.structure[STRUCTURE_CONTAINER][s.id].belong === creep.id ||
+                    creep.room.lookForAt(LOOK_CREEPS, s.pos).length === 0
+                ))
                 if (container) {
                     target = Game.getObjectById(container.id as Id<StructureContainer>)
                     creep.room.memory.structure[STRUCTURE_CONTAINER]![container.id].belong = creep.id
@@ -260,7 +263,7 @@ export const roles: {
             }
             if (creep.memory.data && data.sourceId != '') return true
             const sources: (StructureContainer | StructureStorage | StructureTerminal)[] = creep.room.find(FIND_STRUCTURES, {
-                filter: s => s.structureType in [STRUCTURE_TERMINAL, STRUCTURE_STORAGE, STRUCTURE_CONTAINER]
+                filter: s => _.includes([STRUCTURE_TERMINAL, STRUCTURE_STORAGE, STRUCTURE_CONTAINER], s.structureType)
             })
             if (!sources || sources.length <= 0) return false
             // 按照顺序找source
@@ -327,12 +330,17 @@ export const roles: {
         prepare: (creep: Creep): boolean => {
             let source: null | StructureStorage | StructureTerminal | StructureContainer | Source = null
             if (data.sourceId) source = Game.getObjectById(data.sourceId as Id<StructureStorage | StructureTerminal | StructureContainer | Source>)
-            if (!source) {
+            // 如果还是source，要重新搜寻下，因为container很快就建立
+            //  还找source，会导致堵在harvester旁边
+            if (!source || source instanceof Source) {
                 let sourceMemory: StructureMemory | null = null
                 if (!sourceMemory) sourceMemory = creep.room.getStructure(STRUCTURE_TERMINAL)[0] || null
                 if (!sourceMemory) sourceMemory = creep.room.getStructure(STRUCTURE_STORAGE)[0] || null
                 if (!sourceMemory) sourceMemory = creep.room.getStructure(STRUCTURE_CONTAINER)[0] || null
-                if (!sourceMemory) sourceMemory = creep.room.getSource()[0] || null
+                if (!sourceMemory) {
+                    if (source) sourceMemory = { id: source.id, pos: source.pos, belong: '' } as SourceMemory
+                    else sourceMemory = creep.room.getSource()[0] || null
+                }
                 if (!sourceMemory) {
                     creep.log('找不到source来源，无法工作', 'red')
                     return false

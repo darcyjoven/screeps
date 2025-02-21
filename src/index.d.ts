@@ -285,6 +285,7 @@ interface Room {
   visualizeLayout(level: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8): void
   getStructure(structureType: StructureConstant, fresh?: boolean): StructureMemory[]
   getSource(fresh?: boolean): SourceMemory[]
+  freshAllStructue(): string 
 }
 
 type Colors = 'green' | 'blue' | 'yellow' | 'red'

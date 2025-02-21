@@ -16,6 +16,10 @@ const bodyRoleMap: Record<BodyConfigRole, CreepRole[]> = {
   ProcessorBody: ['Processor']
 };
 
+export const creepRoles: CreepRole[] = ['Harvester', 'Filler', 'Collector',
+  'Upgrader', 'Builder', 'Manager', 'Defender', 'Ranged', 'Healer', 'RemoteHarvester',
+  'RemoteHauler', 'RemoteDefender', 'Claimer', 'Dismantler', 'Processor']
+
 const bodyConfigs: BodyConfig = {
   HarvesterBody: [
     { [WORK]: 2, [CARRY]: 1, [MOVE]: 1 },

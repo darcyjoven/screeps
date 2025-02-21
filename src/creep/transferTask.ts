@@ -22,7 +22,7 @@ export const transferTaskOperations: Record<TransferTaskConstant, TransferTaskOp
             if (creep.memory.fillStructureId) {
                 target = Game.getObjectById(creep.memory.fillStructureId as Id<StructureExtension | StructureSpawn>)
                 // 如果找不到对应的建筑或者已经填满了就移除缓存
-                if (!target || !(target.structureType in [STRUCTURE_EXTENSION, STRUCTURE_SPAWN]) ||
+                if (!target || !(_.includes([STRUCTURE_EXTENSION, STRUCTURE_SPAWN], target.structureType)) ||
                     target.store.getFreeCapacity(RESOURCE_ENERGY) <= 0) {
                     delete creep.memory.fillStructureId
                     target = null
