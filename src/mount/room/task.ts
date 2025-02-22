@@ -1,6 +1,5 @@
 import { creepDefaultMemory, creepRoles } from "setting/creep"
 import SearchExtension from "./search"
-import { info } from "utils/terminal"
 
 /**
  * 任务相关
@@ -10,7 +9,6 @@ export default class TaskExtension extends SearchExtension {
         if (!this.memory.task) this.memory.task = {}
         if (!this.memory.task.spawn) this.memory.task.spawn = [...role]
         else emergency ? this.memory.task.spawn.unshift(...role) : this.memory.task.spawn.push(...role)
-        info(['task','spawn'],'addSpawnTask','task',_.map(this.memory.task.spawn,s=>s.role),'role',_.map(role,r=>r.role))
         // ["task","spawn"] ["addSpawnTask","task",[null,null,null,null,null,null,null,null,null,"Builder"],"role",["Builder"]]
         return OK
     }
@@ -26,7 +24,6 @@ export default class TaskExtension extends SearchExtension {
         if (!this.memory.task) this.memory.task = {}
         if (!this.memory.task.spawn) this.memory.task.spawn = [task]
         else this.memory.task.spawn.push(task)
-        info(['task','spawn'],'addSpawn','task',_.map(this.memory.task.spawn,s=>s.role),'role',role,'task',task)
         return '已添加孵化任务'
     }
     public addCenterTask(emergency: boolean = false, ...task: CenterTask[]): OK | ERR_NAME_EXISTS | ERR_INVALID_TARGET {

@@ -1,6 +1,5 @@
 import { creepDefaultMemory } from "setting/creep";
 import ConfigExtension from "./config";
-import { info } from "utils/terminal";
 
 export default class CreepControl extends ConfigExtension {
     /**
@@ -96,14 +95,11 @@ export default class CreepControl extends ConfigExtension {
         cnt += this.find(FIND_MY_CREEPS, {
             filter: s => s.memory.role === role
         }).length
-        info(['creep', 'reSpawn'], 'live cnt', cnt)
         // 孵化队列
         cnt += _.filter(this.memory.task?.spawn || [], t => t.role === role).length
-        info(['creep', 'reSpawn'], 'live+task cnt', cnt)
         cnt -= 1
         if (!this.memory.stat) return false
         // 如果大于配置的数量，不需要孵化
-        info(['creep', 'reSpawn'], 'config cnt', ((this.memory.stat.currentState as Partial<Record<CreepRole, number>>)[role] || 0))
         if (cnt > ((this.memory.stat.currentState as Partial<Record<CreepRole, number>>)[role] || 0)) return false
         return false
     }

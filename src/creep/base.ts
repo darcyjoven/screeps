@@ -1,6 +1,5 @@
 import { fillerMinEnemy, TASK_EXTENSION, TASK_TOWER } from "setting/global"
 import { transferTaskOperations } from "./transferTask"
-import { info } from "utils/terminal"
 
 const TRANSFER_DEATH_LIMIT = 20
 
@@ -79,11 +78,9 @@ export const roles: {
         // 因为 prepare 准备完之后会先执行 source 阶段，所以在这个阶段里对 container 进行维护
         // 在这个阶段中，targetId 仅指 container
         source: (creep: Creep) => {
-            creep.log('source')
-            creep.say('stand')
+            creep.say('🚧')
 
             // 没有能量就进行采集，因为是维护阶段，所以允许采集一下工作一下
-            creep.log('source1')
             if (creep.store[RESOURCE_ENERGY] <= 0) {
                 const source = Game.getObjectById(data.sourceId as Id<Source>)
                 if (source) creep.getFrom(source)
@@ -91,7 +88,6 @@ export const roles: {
             }
             // 获取 prepare 阶段中保存的 targetId
             let target = Game.getObjectById((creep.memory.data as HarvesterData).targetId as Id<StructureContainer | Source>)
-            creep.log('source2')
             // 存在 container，把血量修满
             if (target && target instanceof StructureContainer) {
                 creep.repair(target)
@@ -104,7 +100,6 @@ export const roles: {
             if (!target || target instanceof Source) creep.pos.createConstructionSite(STRUCTURE_CONTAINER)
             // 没找到工地缓存或者工地没了，重新搜索 
             constructionSite = creep.pos.lookFor(LOOK_CONSTRUCTION_SITES).find(s => s.structureType === STRUCTURE_CONTAINER)
-            creep.log('source3')
 
             // 还没找到就说明有可能工地已经建好了，进行搜索
             if (!constructionSite) {
@@ -121,16 +116,13 @@ export const roles: {
                 return false
                 // 找到了就缓存 id
             } else {
-                creep.log('source4');
                 (creep.memory.data as HarvesterData).targetId = constructionSite.id
             }
-            const result = creep.build(constructionSite)
-            creep.log('source5')
+            creep.build(constructionSite)
             return false
         },
         // 采集阶段会无脑采集，过量的能量会掉在 container 上然后被接住存起来
         target: (creep: Creep): boolean => {
-            creep.log('source6')
             const target = Game.getObjectById((data).sourceId as Id<Source>)
             if (target) creep.getFrom(target)
             else return false
@@ -423,7 +415,6 @@ export const roles: {
                 creep.log('找不到可用的source')
                 return false
             }
-            info(['creep', 'filler'], 'prepare', 'data', creep.memory.data)
             creep.memory.data = { sourceId: source.id, targetId: '' } as WorkerData
             creep.memory.ready = true
             return true
@@ -432,14 +423,12 @@ export const roles: {
         source: (creep: Creep): boolean => {
             if (creep.store[RESOURCE_ENERGY] > 0) return true
             const source = Game.getObjectById((creep.memory.data as WorkerData).sourceId as Id<StructureContainer | StructureStorage>)
-            info(['creep', 'filler'], 'source', 'id', source?.id)
             if (!source) {
                 creep.say('无souce')
                 creep.log('找不到可用的source')
                 return false
             }
             const result = creep.getFrom(source)
-            info(['creep', 'filler'], 'source', 'result', result)
             return result === OK || result === ERR_FULL
         },
         // 维持房间能量填充
@@ -447,13 +436,11 @@ export const roles: {
             // BUG 没有能量还在填
             let task = creep.room.nextTransferTaskBy(TASK_EXTENSION)
             if (!task) creep.room.nextTransferTaskBy(TASK_TOWER)
-            info(['creep', 'filler'], 'target', 'task', task)
             if (task && (task.type === TASK_EXTENSION || task.type === TASK_TOWER)) {
                 if (transferTaskOperations[task.type].target(creep, task)) {
                     return true
                 } else return false
             } else {
-                info(['creep', 'filler'], '将能量放到stroage中')
                 // 将能量放到stroage中
                 if (!creep.room.storage) return false
                 const source = Game.getObjectById((creep.memory.data as WorkerData).sourceId as Id<StructureContainer>)

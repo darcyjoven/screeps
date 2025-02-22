@@ -1,5 +1,4 @@
 import { STRUCTURE_TOWER_MIN_ENERGY_WAR, TASK_BOOSTCLEAR, TASK_BOOSTGETENERGY, TASK_BOOSTGETRESOURCE, TASK_EXTENSION, TASK_LABIN, TASK_LABOUT, TASK_NUKER, TASK_POWER, TASK_TOWER } from "setting/global";
-import { info } from "utils/terminal";
 
 /**
  * //TODO 房间物流任务处理
@@ -18,12 +17,10 @@ export const transferTaskOperations: Record<TransferTaskConstant, TransferTaskOp
         },
         target: (creep, task): boolean => {
             let target: StructureExtension | StructureSpawn | null = null
-            info(['creep', 'filler'], 'filler', 'fillStructureId', creep.memory.fillStructureId)
             // 有缓存就用缓存
             if (creep.memory.fillStructureId) {
                 target = Game.getObjectById(creep.memory.fillStructureId as Id<StructureExtension | StructureSpawn>)
                 // 如果找不到对应的建筑或者已经填满了就移除缓存
-                info(['creep', 'filler'], 'filler', 'structureType', target?.structureType)
                 if (!target || !(_.includes([STRUCTURE_EXTENSION, STRUCTURE_SPAWN], target.structureType)) ||
                     target.store.getFreeCapacity(RESOURCE_ENERGY) <= 0) {
                     delete creep.memory.fillStructureId
@@ -36,18 +33,15 @@ export const transferTaskOperations: Record<TransferTaskConstant, TransferTaskOp
                     filter: s => (s.structureType == STRUCTURE_EXTENSION || s.structureType == STRUCTURE_SPAWN) &&
                         s.store.getFreeCapacity(RESOURCE_ENERGY) > 0
                 })
-                info(['creep', 'filler'], 'filler', 'find', target?.structureType)
                 if (!target) {
                     creep.room.finishTransferTaskBy(task.type)
                     return true
                 }
-                info(['creep', 'filler'], 'filler', 'find', target?.structureType)
                 creep.memory.fillStructureId = target.id
             }
             // 这里应该是extension填满之后，再返回OK
             const result = creep.giveTo(target, RESOURCE_ENERGY)
             if (result != OK && result != ERR_NOT_IN_RANGE) creep.say(`extension ${result}`)
-            info(['creep', 'filler'], 'store', creep.store[RESOURCE_ENERGY])
             if (creep.store[RESOURCE_ENERGY] === 0) return true
             return false
         }

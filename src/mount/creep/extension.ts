@@ -1,7 +1,6 @@
 import { dashRange, stanbyRange, minWallHits } from "setting/global"
 import { unserializePos, getSurroundingPos, serializePos, getOppositeDirection } from "utils/path"
 import roles from "creep"
-import { info } from "utils/terminal"
 
 // creep 原型拓展
 export default class CreepExtension extends Creep {
@@ -28,7 +27,6 @@ export default class CreepExtension extends Creep {
             // 释放出禁止通行点
             if (this.memory.isStand) this.room.rmAvoidPos(this.name)
             // BUG harvester未重新孵化
-            info(['creep', 'reSpawn'], 'isNeed', creepConfig.isNeed ? (this) : 'no')
             if (creepConfig.isNeed && creepConfig.isNeed(this)) {
                 // 需要需要重新孵化，就立即自杀重新孵化
                 this.memory.ready = false
@@ -54,16 +52,10 @@ export default class CreepExtension extends Creep {
         const working = creepConfig.source ? this.memory.working : true
         let stateChange = false
         // 执行阶段 
-        info(['creep'], 'role',this.memory.role,this.memory.working,'----------',Game.time) 
-        info(['creep'], 'role','working----------',working) 
-        info(['creep'], 'role','this.memory.working-------',this.memory.working) 
         if (working===true) {
-            // BUG harvester 永远为false
             const ok = creepConfig.target && creepConfig.target(this) 
-            info(['creep'],'target-----------------',ok)
             if (ok) stateChange = true
         } else {
-            info(['creep'],'source=---------------')
             const ok = creepConfig.source && creepConfig.source(this) 
             if (ok) stateChange = true
         }
@@ -465,7 +457,6 @@ export default class CreepExtension extends Creep {
         ) {
             // 查看是否有缓存路径      
             const routeKey = `${serializePos(this.pos)},${serializePos(target)}`
-            info(['creep', 'race'], 'routekey', routeKey, 'from', this.pos, serializePos(this.pos), 'to', target, serializePos(target))
             let route = Memory.routeCache[routeKey]
             if (!route || !route.path) {
                 route = { path: '', lastUsed: 0 }
