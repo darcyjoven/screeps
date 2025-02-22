@@ -162,7 +162,7 @@ export default class CreepExtension extends Creep {
         const frontCreep = frontPos.lookFor(LOOK_CREEPS)[0] || frontPos.lookFor(LOOK_POWER_CREEPS)[0]
         if (!frontCreep) return ERR_NOT_FOUND
 
-        this.say('=>')
+        this.say('👉')
         if (frontCreep.requireCross(getOppositeDirection(direction)) === OK) this._move(direction)
         else return ERR_BUSY
 
@@ -179,12 +179,12 @@ export default class CreepExtension extends Creep {
         if (!this.memory) return OK
 
         if (this.memory.standed || this.memory.isStand) {
-            this.say('||')
+            this.say('👊')
             return ERR_BUSY
         }
 
         // 可以对穿
-        this.say('<=')
+        this.say('👌')
         this.move(direction)
         return OK
     }
