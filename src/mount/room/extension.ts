@@ -7,9 +7,10 @@ export default class RoomExtension extends creepControl {
         // creep运维数量控制
         this.creepNumberControl()
         // 清除无creep的内存
-        this.clearCreepMemory()
+        // this.clearCreepMemory()
         // 有工地发布Builder
         this.releaseBuilder()
+        this.initUpgraderPos()
     }
     public registerContainer(structure: StructureContainer): void {
         if (!this.sourceContainers) this.sourceContainers = [structure]

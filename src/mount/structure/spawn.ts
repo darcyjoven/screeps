@@ -1,6 +1,7 @@
 import { getBodyConfig } from "setting/creep"
 import { generateCreepId } from "utils/tool"
 import { TASK_EXTENSION } from "setting/global"
+import { info } from "utils/terminal"
 
 export default class SpawnExtension extends StructureSpawn {
     public work(): void {
@@ -52,7 +53,9 @@ export default class SpawnExtension extends StructureSpawn {
         if (transferTask) return
         // 检查能量是否充足
         // 能量小于容量的50% 或者 孵化的下一tick时发布物流任务
+        if (this.spawning) info(['spawn'], '孵化需要时间', this.spawning.needTime, '剩余时间', this.spawning.remainingTime)
         if (this.room.energyAvailable / this.room.energyCapacityAvailable <= 0.5 ||
+            // BUG 没有持续发布任务
             (this.spawning && this.spawning.needTime - this.spawning.remainingTime === 1)) {
             this.room.addTransferTask(false, { type: TASK_EXTENSION })
             // TODO 这里应有一个Power任务需要实现
@@ -72,8 +75,10 @@ export default class SpawnExtension extends StructureSpawn {
         // 如果能量不足将当前任务放到最后
         if (result === OK) this.room.finishSpawnTask()
         else if (result === ERR_NOT_ENOUGH_ENERGY) {
-            this.room.addSpawnTask(false, spawnTask)
-            this.room.finishSpawnTask()
+            return
+            // [ ] 先不使用此功能
+            // this.room.addSpawnTask(false, spawnTask)
+            // this.room.finishSpawnTask()
         }
     }
 }

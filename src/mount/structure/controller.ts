@@ -1,4 +1,5 @@
 import { getCurrentState } from "mount/room/creepControl";
+import { info } from "utils/terminal";
 
 export default class ControllerExtension extends StructureController {
     public work() {
@@ -17,6 +18,7 @@ export default class ControllerExtension extends StructureController {
         // 进行升级建筑工地规划
         if (this.room.memory.stat.layout < this.room.memory.stat.rcl) {
             const level = this.room.memory.stat.layout + 1
+            info(['controler', 'levelup'], 'level', level)
             if (level > 8 || level < 2) {
                 this.room.log(`无法规划当前level:${level}`, 'autoPlan', 'red')
                 return

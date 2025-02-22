@@ -2,6 +2,7 @@
  * 定义终端帮助文档的输出的样式
  * 基本照抄github.com/hopgoldy/screeps-ai
  */
+import { replace } from "lodash"
 import { colorful } from "./color"
 
 export const createHelp = (...modules: ModuleDescribe[]): string => {
@@ -208,9 +209,17 @@ export function createLink(content: string, url: string, newTab: boolean = true)
 
 const infoShow: Record<string, boolean> = {
     main: false,
-    creep: false,
+    creep: true,
     room: false,
-    spawn: false,
+    spawn: true,
+    race: false,
+    filler: false,
+    reSpwn: true,
+    task: true,
+    controler: true,
+    levelup: true,
+    harvester: true,
+    source: true,
 }
 /**
  * 输出debug信息

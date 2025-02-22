@@ -147,7 +147,7 @@ export default class LayoutExtension extends RoomExtension {
     public snapshotLayout(flagName: string): void {
     }
     /**
-     * //TODO 可视化工具
+     * [ ] 可视化工具
      */
     public visualizeLayout(rcl: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8): void {
 
@@ -180,5 +180,35 @@ export default class LayoutExtension extends RoomExtension {
             }
         }
         return JSON.stringify(planToolData)
+    }
+    /**
+     * 初始化controller点位
+     * @returns 
+     */
+    public initUpgraderPos(): void {
+        if (this.memory.upgraderPos) return
+        // 获取控制器的位置
+        const controllerPos = this.controller?.pos
+        if (!controllerPos) return
+
+        // 获取控制器周围7x7范围内的所有位置
+        let positions = []
+
+        for (let x = controllerPos.x - 3; x <= controllerPos.x + 3; x++) {
+            for (let y = controllerPos.y - 3; y <= controllerPos.y + 3; y++) {
+                let pos = new RoomPosition(x, y, this.name);
+                // 检查位置是否可以移动
+                if (this.getTerrain().get(x, y) !== TERRAIN_MASK_WALL) {
+                    positions.push(pos);
+                }
+            }
+        }
+
+        // 按照与控制器的距离排序
+        this.memory.upgraderPos = []
+        positions.sort((a, b) => a.getRangeTo(controllerPos) - b.getRangeTo(controllerPos))
+        positions.forEach((p) => {
+            this.memory.upgraderPos?.push(p)
+        })
     }
 }

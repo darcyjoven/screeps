@@ -80,6 +80,12 @@ type CreepData = EmptyData | HarvesterData | WorkerData | ProcessorData | Remote
 interface Memory {
   bypassRooms: string[]
   shareTask: ShareTask[]
+  routeCache: {
+    [routeKey: string]: {
+      path: string,
+      lastUsed: number
+    }
+  }
 }
 // Creep的内存管理
 interface CreepMemory {
@@ -193,12 +199,12 @@ type RoomTask = {
 type SourceType = 'source'
 interface SourceMemory {
   id: string
-  pos: RoomPosition
+  pos: { x: number, y: number }
   belong: string
 }
 interface StructureMemory {
   id: string
-  pos: RoomPosition
+  pos: { x: number, y: number }
   belong?: string
 }
 interface RoomMemory {
@@ -237,6 +243,7 @@ interface RoomMemory {
   }
   //Processor 待命位置
   processor: ProcessorData
+  upgraderPos?: { x: number, y: number }[]
 }
 interface SpawnMemory {
   belong?: string | null
@@ -285,7 +292,8 @@ interface Room {
   visualizeLayout(level: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8): void
   getStructure(structureType: StructureConstant, fresh?: boolean): StructureMemory[]
   getSource(fresh?: boolean): SourceMemory[]
-  freshAllStructue(): string 
+  freshAllStructue(): string
+  initUpgraderPos():void
 }
 
 type Colors = 'green' | 'blue' | 'yellow' | 'red'

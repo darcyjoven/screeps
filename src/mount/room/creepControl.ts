@@ -1,5 +1,6 @@
 import { creepDefaultMemory } from "setting/creep";
 import ConfigExtension from "./config";
+import { info } from "utils/terminal";
 
 export default class CreepControl extends ConfigExtension {
     /**
@@ -26,6 +27,8 @@ export default class CreepControl extends ConfigExtension {
      * @param state 
      */
     public stateChange(state: OperationState): void {
+        // 刷新建筑
+        this.freshAllStructue()
         // 保存旧的配置,用来判断creep是否需要suicide 
         const oldConfig = this.memory.stat?.creepConfigs || {}
         // 直接覆盖原来的值
@@ -93,10 +96,14 @@ export default class CreepControl extends ConfigExtension {
         cnt += this.find(FIND_MY_CREEPS, {
             filter: s => s.memory.role === role
         }).length
+        info(['creep', 'reSpawn'], 'live cnt', cnt)
         // 孵化队列
         cnt += _.filter(this.memory.task?.spawn || [], t => t.role === role).length
+        info(['creep', 'reSpawn'], 'live+task cnt', cnt)
+        cnt -= 1
         if (!this.memory.stat) return false
         // 如果大于配置的数量，不需要孵化
+        info(['creep', 'reSpawn'], 'config cnt', ((this.memory.stat.currentState as Partial<Record<CreepRole, number>>)[role] || 0))
         if (cnt > ((this.memory.stat.currentState as Partial<Record<CreepRole, number>>)[role] || 0)) return false
         return false
     }

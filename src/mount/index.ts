@@ -30,4 +30,7 @@ const memoryInit = () => {
         if (!Game.rooms[name].memory.layout) Game.rooms[name].memory.layout = {}
         if (!Game.rooms[name].memory.processor) Game.rooms[name].memory.processor = { x: 0, y: 0 }
     }
+    if (!Memory.bypassRooms) Memory.bypassRooms = []
+    if (!Memory.routeCache) Memory.routeCache = {}
+    if (!Memory.shareTask) Memory.shareTask = []
 }

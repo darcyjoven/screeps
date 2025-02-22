@@ -95,7 +95,7 @@ export default [
             {
               title: 'creep初始化资料',
               describe: '初始化creep，会将缓存等资料重置为默认值',
-              functionName: 'creep.init()'
+              functionName: 'creep.init'
             },
             /**
              * 重新缓存房间所有建筑
@@ -103,7 +103,7 @@ export default [
             {
               title: '重新缓存房间所有建筑',
               describe: '刷新所有建筑缓存',
-              functionName: 'room.freshAllStructue()'
+              functionName: 'room.freshAllStructue'
             },
             /**
              * 添加孵化任务
@@ -114,7 +114,7 @@ export default [
               params: [
                 { name: 'role', describe: '要孵化的角色' }
               ],
-              functionName: 'room.addSpawn(role)'
+              functionName: 'room.addSpawn'
             }
           ]
         }, {

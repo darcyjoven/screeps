@@ -1,6 +1,7 @@
 import { dashRange, stanbyRange, minWallHits } from "setting/global"
 import { unserializePos, getSurroundingPos, serializePos, getOppositeDirection } from "utils/path"
 import roles from "creep"
+import { info } from "utils/terminal"
 
 // creep 原型拓展
 export default class CreepExtension extends Creep {
@@ -26,6 +27,8 @@ export default class CreepExtension extends Creep {
         if (this.ticksToLive && this.ticksToLive <= 3) {
             // 释放出禁止通行点
             if (this.memory.isStand) this.room.rmAvoidPos(this.name)
+            // BUG harvester未重新孵化
+            info(['creep', 'reSpawn'], 'isNeed', creepConfig.isNeed ? (this) : 'no')
             if (creepConfig.isNeed && creepConfig.isNeed(this)) {
                 // 需要需要重新孵化，就立即自杀重新孵化
                 this.memory.ready = false
@@ -51,11 +54,17 @@ export default class CreepExtension extends Creep {
         const working = creepConfig.source ? this.memory.working : true
         let stateChange = false
         // 执行阶段 
-        if (working) {
-            const ok = creepConfig.target && creepConfig.target(this)
+        info(['creep'], 'role',this.memory.role,this.memory.working,'----------',Game.time) 
+        info(['creep'], 'role','working----------',working) 
+        info(['creep'], 'role','this.memory.working-------',this.memory.working) 
+        if (working===true) {
+            // BUG harvester 永远为false
+            const ok = creepConfig.target && creepConfig.target(this) 
+            info(['creep'],'target-----------------',ok)
             if (ok) stateChange = true
         } else {
-            const ok = creepConfig.source && creepConfig.source(this)
+            info(['creep'],'source=---------------')
+            const ok = creepConfig.source && creepConfig.source(this) 
             if (ok) stateChange = true
         }
         // 状态变化了就释放工作位置
@@ -189,6 +198,8 @@ export default class CreepExtension extends Creep {
     }
     /**
      * 升级本房间控制器
+     * 
+     * 阻塞
      */
     public upgrade(): ScreepsReturnCode {
         if (!this.room.controller) return ERR_NOT_FOUND
@@ -453,9 +464,9 @@ export default class CreepExtension extends Creep {
             (this.pos.getRangeTo(this.room.memory.standBy.x, this.room.memory.standBy.y) > stanbyRange) // 距离standby太远
         ) {
             // 查看是否有缓存路径      
-            const routeKey = `${serializePos(this.pos), serializePos(target)}`
-            if (!this.room.memory.routeCache) this.room.memory.routeCache = {}
-            let route = this.room.memory.routeCache[routeKey]
+            const routeKey = `${serializePos(this.pos)},${serializePos(target)}`
+            info(['creep', 'race'], 'routekey', routeKey, 'from', this.pos, serializePos(this.pos), 'to', target, serializePos(target))
+            let route = Memory.routeCache[routeKey]
             if (!route || !route.path) {
                 route = { path: '', lastUsed: 0 }
                 // 要进行寻路
@@ -465,7 +476,7 @@ export default class CreepExtension extends Creep {
                     swampCost: 10,
                 })
                 route.path = this.serializePath(result)
-                this.room.memory.routeCache[routeKey] = route
+                Memory.routeCache[routeKey] = route
             }
             // 根据缓存移动
             route.lastUsed = Game.time
@@ -496,8 +507,8 @@ export default class CreepExtension extends Creep {
             (this.pos.getRangeTo(this.room.memory.standBy.x, this.room.memory.standBy.y) > stanbyRange) // 距离standby太远
         ) {
             // 查看是否有缓存路径      
-            const routeKey = `${serializePos(this.pos), serializePos(target)}`
-            let route = this.room.memory.routeCache[routeKey]
+            const routeKey = `${serializePos(this.pos)},${serializePos(target)}`
+            let route = Memory.routeCache[routeKey]
             if (!route || !route.path) {
                 route = { path: '', lastUsed: 0 }
                 // 要进行寻路
@@ -534,7 +545,7 @@ export default class CreepExtension extends Creep {
                 })
                 if (result.path.length <= 0 || !result.incomplete) return ERR_NO_PATH
                 route.path = this.serializeFarPath(result.path)
-                this.room.memory.routeCache[routeKey] = route
+                Memory.routeCache[routeKey] = route
             }
             // 根据缓存移动
             route.lastUsed = Game.time
@@ -592,7 +603,7 @@ export default class CreepExtension extends Creep {
     public init(): string {
         this.memory.data = {}
         this.memory.ready = false
-        this.memory.isStand=false 
+        this.memory.isStand = false
         return '初始化完成'
     }
 }
@@ -603,6 +614,8 @@ export default class CreepExtension extends Creep {
  *  建筑建立完成后的触发函数
  */
 const structureInfo = (structure: Structure<StructureConstant>): void => {
+    // 刷新该类型建筑缓存
+    structure.room.getStructure(structure.structureType, true)
     switch (structure.structureType) {
         case STRUCTURE_CONTAINER:
             // 两个container都建立完成后，转变为container阶段
