@@ -229,3 +229,38 @@ export function info(module: string[], ...content: any[]): void {
     if (_.some(module, m => !infoShow[m])) return
     console.log(colorful(JSON.stringify(module), 'green', true), JSON.stringify(content))
 }
+
+const warnShow: Record<string, boolean> = {
+    creep: true,
+    room: false,
+    structure: false,
+    global: false,
+    setting: false,
+    util: false,
+    main: true,
+}
+
+/**
+ * 键值对方式显示日志
+ * @param module 
+ * @param record 
+ * @returns 
+ */
+export const warn = (module: string[], ...record: [string, any][]) => {
+    if (!global.isDebug) return
+    if (module.length <= 0) return
+    if (!warnShow[module[0]]) return
+    // module 显示 
+    const prefix = colorful(JSON.stringify(module), 'red', true)
+
+    const colors: Colors[] = ['blue', 'green', 'yellow']
+    let content: string = ''
+    if (record.length == 1) {
+        content = `"${record[0][0]}":${JSON.stringify(record[0][1])}`
+    } else {
+        record.forEach((r, i) => {
+            content += colorful("\n" + " ".repeat(10) + `${i + 1}. "${r[0]}" : ${JSON.stringify(r[1])}`, colors[i % 3])
+        })
+    }
+    console.log(prefix, content)
+}
