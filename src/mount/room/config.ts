@@ -1,3 +1,4 @@
+import { serializePos } from "utils/path"
 import { log, createRoomLink } from "utils/terminal"
 /**
  * 一些房间内的配置
@@ -7,7 +8,18 @@ export default class ConfigExtension extends Room {
      * 添加不允许通过position
      */
     public addAvoidPos(creepName: string, pos: RoomPosition): void {
+        if (!this.memory.avoidPos) {
 
+            this.memory.avoidPos = { creepName: serializePos(pos) }
+            return
+        }
+        if (!this.memory.avoidPos[creepName]) {
+            this.memory.avoidPos[creepName] = serializePos(pos)
+            return
+        }
+        if (this.memory.avoidPos[creepName] != serializePos(pos)) {
+            this.memory.avoidPos[creepName] = serializePos(pos)
+        }
     }
     /**
      * 将指定位置从禁止通行点位中移除
@@ -15,6 +27,8 @@ export default class ConfigExtension extends Room {
      * @param creepName 要是否点位的注册者名称
      */
     public rmAvoidPos(creepName: string): void {
+        if (!this.memory.avoidPos) return
+        delete this.memory.avoidPos[creepName]
     }
     /**
      * 全局日志

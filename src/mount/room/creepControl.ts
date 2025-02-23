@@ -1,5 +1,6 @@
 import { creepDefaultMemory } from "setting/creep";
 import ConfigExtension from "./config";
+import { log } from "./extension";
 
 export default class CreepControl extends ConfigExtension {
     /**
@@ -116,10 +117,18 @@ export default class CreepControl extends ConfigExtension {
         if (constructureSites && constructureSites.length > 0) {
             // 获得配置Builder数量
             let cnt = stateControls[this.memory.stat?.currentState || 'claim'].Builder || 0
+            log('release', 'config.lenght', cnt)
             if (cnt <= 0) return
             cnt -= this.find(FIND_MY_CREEPS, { filter: c => c.memory.role === 'Builder' }).length
+            log('release', 'after find creep.lenght', cnt)
             if (cnt <= 0) return
             cnt -= this.memory.task?.spawn?.filter(s => s.role === 'Builder').length || 0
+            log('release', 'after task lenght', cnt)
+            // [ ] 增加一个查询正在孵化中creep功能
+            this.find(FIND_STRUCTURES, { filter: s => s.structureType === STRUCTURE_SPAWN }).forEach(s => {
+                if (s.spawning && s.spawning.name.indexOf('Builder') !== -1) cnt -= 1
+            })
+            log('release', 'after spawning lenght', cnt)
             if (cnt <= 0) return
             this.addSpawnTask(false, ...(new Array(cnt).fill('Builder')))
         }

@@ -86,6 +86,7 @@ interface Memory {
       lastUsed: number
     }
   }
+  log?: string[]
 }
 // Creep的内存管理
 interface CreepMemory {
@@ -244,6 +245,9 @@ interface RoomMemory {
   //Processor 待命位置
   processor: ProcessorData
   upgraderPos?: { x: number, y: number }[]
+  avoidPos?: {
+    [key: string]: string
+  }
 }
 interface SpawnMemory {
   belong?: string | null
@@ -293,7 +297,7 @@ interface Room {
   getStructure(structureType: StructureConstant, fresh?: boolean): StructureMemory[]
   getSource(fresh?: boolean): SourceMemory[]
   freshAllStructue(): string
-  initUpgraderPos():void
+  initUpgraderPos(): void
 }
 
 type Colors = 'green' | 'blue' | 'yellow' | 'red'

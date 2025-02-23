@@ -52,11 +52,11 @@ export default class CreepExtension extends Creep {
         const working = creepConfig.source ? this.memory.working : true
         let stateChange = false
         // 执行阶段 
-        if (working===true) {
-            const ok = creepConfig.target && creepConfig.target(this) 
+        if (working === true) {
+            const ok = creepConfig.target && creepConfig.target(this)
             if (ok) stateChange = true
         } else {
-            const ok = creepConfig.source && creepConfig.source(this) 
+            const ok = creepConfig.source && creepConfig.source(this)
             if (ok) stateChange = true
         }
         // 状态变化了就释放工作位置
@@ -432,6 +432,8 @@ export default class CreepExtension extends Creep {
     // CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND;
     public dash(target: RoomPosition): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND {
         const result = this.moveTo(target, {
+            plainCost: 2,
+            swampCost: 10,
             visualizePathStyle: {
                 fill: 'transparent',
                 stroke: '#ffffff',
@@ -439,8 +441,18 @@ export default class CreepExtension extends Creep {
                 strokeWidth: 0.15,
                 opacity: 0.1
             },
-            ignoreCreeps: true,
-            swampCost: 8,
+            costCallback: (name, cost) => {
+                const room = Game.rooms[name]
+                if (!room) return
+                // 排除掉禁止通行点
+                const avoidPos = room.getAvoidPos()
+                for (const name in avoidPos) {
+                    if (name === this.name) continue
+                    const pos = unserializePos(avoidPos[name])
+                    cost.set(pos!.x, pos!.y, 0xff)
+                }
+                return cost
+            }
         })
         return result
     }
@@ -455,16 +467,27 @@ export default class CreepExtension extends Creep {
             (this.room.memory.standBy.x === this.pos.x && this.room.memory.standBy.y === this.pos.y) || // 已经在standby上
             (this.pos.getRangeTo(this.room.memory.standBy.x, this.room.memory.standBy.y) > stanbyRange) // 距离standby太远
         ) {
-            // 查看是否有缓存路径      
+            // 查看是否有缓存路径
             const routeKey = `${serializePos(this.pos)},${serializePos(target)}`
             let route = Memory.routeCache[routeKey]
             if (!route || !route.path) {
                 route = { path: '', lastUsed: 0 }
                 // 要进行寻路
                 const result = this.room.findPath(this.pos, target, {
-                    ignoreCreeps: true,
                     plainCost: 2,
                     swampCost: 10,
+                    costCallback: (name, cost) => {
+                        const room = Game.rooms[name]
+                        if (!room) return
+                        // 排除掉禁止通行点
+                        const avoidPos = room.getAvoidPos()
+                        for (const name in avoidPos) {
+                            if (name === this.name) continue
+                            const pos = unserializePos(avoidPos[name])
+                            cost.set(pos!.x, pos!.y, 0xff)
+                        }
+                        return cost
+                    }
                 })
                 route.path = this.serializePath(result)
                 Memory.routeCache[routeKey] = route

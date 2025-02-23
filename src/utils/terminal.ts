@@ -231,13 +231,13 @@ export function info(module: string[], ...content: any[]): void {
 }
 
 const warnShow: Record<string, boolean> = {
-    creep: true,
-    room: false,
+    creep: false,
+    room: true,
     structure: false,
     global: false,
     setting: false,
     util: false,
-    main: true,
+    main: false,
 }
 
 /**
