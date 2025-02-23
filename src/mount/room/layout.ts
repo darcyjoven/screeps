@@ -129,6 +129,7 @@ export default class LayoutExtension extends RoomExtension {
                     continue
                 }
                 const result = this.createConstructionSite(structure[0], structure[1], structureType as BuildableStructureConstant)
+                this.memory.spawnBuilder = true
                 if (result !== OK) info += `新建工地失败-建筑类型:${structureType} 报错代码:${result}` + '\n'
                 else {
                     sites.push(structureType as BuildableStructureConstant)

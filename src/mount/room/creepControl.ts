@@ -112,6 +112,8 @@ export default class CreepControl extends ConfigExtension {
      * 此函数应该有room.work调用
      */
     public releaseBuilder(): void {
+        if (!this.memory.spawnBuilder) return
+        this.memory.spawnBuilder = false
         const constructureSites = this.find(FIND_MY_CONSTRUCTION_SITES)
         // 有工地
         if (constructureSites && constructureSites.length > 0) {
@@ -130,7 +132,7 @@ export default class CreepControl extends ConfigExtension {
             })
             log('release', 'after spawning lenght', cnt)
             if (cnt <= 0) return
-            this.addSpawnTask(false, ...(new Array(cnt).fill('Builder')))
+            this.addSpawnTask(false, ...(new Array(cnt).fill({ role: 'Builder', name: '', memory: creepDefaultMemory['Builder'] } as SpawnTask)))
         }
     }
 }

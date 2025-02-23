@@ -248,6 +248,7 @@ interface RoomMemory {
   avoidPos?: {
     [key: string]: string
   }
+  spawnBuilder?: boolean
 }
 interface SpawnMemory {
   belong?: string | null

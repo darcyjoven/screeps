@@ -97,7 +97,10 @@ export const roles: {
 
             // 不存在 container，开始新建，首先尝试获取工地缓存，没有缓存就新建工地
             let constructionSite: ConstructionSite | undefined | null = null
-            if (!target || target instanceof Source) creep.pos.createConstructionSite(STRUCTURE_CONTAINER)
+            if (!target || target instanceof Source) {
+                creep.pos.createConstructionSite(STRUCTURE_CONTAINER)
+                creep.room.memory.spawnBuilder = true
+            }
             // 没找到工地缓存或者工地没了，重新搜索 
             constructionSite = creep.pos.lookFor(LOOK_CONSTRUCTION_SITES).find(s => s.structureType === STRUCTURE_CONTAINER)
 
