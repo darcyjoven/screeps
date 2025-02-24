@@ -3,6 +3,7 @@ import { warn } from "utils/terminal";
 
 export default class RoomExtension extends creepControl {
     public work(): void {
+        // [ ] 初始化待命点，processor、defense、运维
         // 判断container建立完成
         this.toContianerState()
         // creep运维数量控制
@@ -31,7 +32,7 @@ export default class RoomExtension extends creepControl {
 
 const infoShow: Record<string, boolean> = {
     task: false,
-    release:false,
+    release: false,
 }
 
 export const log = (func: string, ...args: any[]): void => {

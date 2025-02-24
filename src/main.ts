@@ -14,5 +14,5 @@ export const loop = ErrorMapper.wrapLoop(() => {
     work(Game.structures, Game.creeps, Game.powerCreeps, Game.rooms)
     // 搓 pixel
     generatePixel()
-    // TODO 统计全局的资源
+    // [ ] 统计全局的资源
 });

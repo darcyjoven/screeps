@@ -143,7 +143,7 @@ export default class LayoutExtension extends RoomExtension {
         return sites
     }
     /**
-     * //TODO 保存当前布局到内存
+     * [ ] 保存当前布局到内存
      */
     public snapshotLayout(flagName: string): void {
     }

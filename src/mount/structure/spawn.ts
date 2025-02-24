@@ -56,7 +56,7 @@ export default class SpawnExtension extends StructureSpawn {
             // BUG 没有持续发布任务
             (this.spawning && this.spawning.needTime - this.spawning.remainingTime === 1)) {
             this.room.addTransferTask(false, { type: TASK_EXTENSION })
-            // TODO 这里应有一个Power任务需要实现
+            // [ ] 这里应有一个Power任务需要实现
         }
     }
     /**
@@ -74,7 +74,7 @@ export default class SpawnExtension extends StructureSpawn {
         if (result === OK) this.room.finishSpawnTask()
         else if (result === ERR_NOT_ENOUGH_ENERGY) {
             return
-            // [ ] 先不使用此功能
+            // [ ] 先不使用此功能，资源不足会频繁调用
             // this.room.addSpawnTask(false, spawnTask)
             // this.room.finishSpawnTask()
         }

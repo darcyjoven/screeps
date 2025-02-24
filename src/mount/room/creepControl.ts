@@ -126,7 +126,7 @@ export default class CreepControl extends ConfigExtension {
             if (cnt <= 0) return
             cnt -= this.memory.task?.spawn?.filter(s => s.role === 'Builder').length || 0
             log('release', 'after task lenght', cnt)
-            // [ ] 增加一个查询正在孵化中creep功能
+            // [x] 增加一个查询正在孵化中creep功能
             this.find(FIND_STRUCTURES, { filter: s => s.structureType === STRUCTURE_SPAWN }).forEach(s => {
                 if (s.spawning && s.spawning.name.indexOf('Builder') !== -1) cnt -= 1
             })

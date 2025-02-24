@@ -130,7 +130,7 @@ export const roles: {
             if (target) creep.getFrom(target)
             else return false
             // 快死了就把身上的能量丢出去，这样就会存到下面的 container 里，否则变成墓碑后能量无法被 container 自动回收
-            if (creep.ticksToLive && creep.ticksToLive < 2) creep.drop(RESOURCE_ENERGY)
+            if (creep.ticksToLive && creep.ticksToLive < 5) creep.drop(RESOURCE_ENERGY)
             return false
         },
         isNeed: (creep: Creep) => {
@@ -373,7 +373,8 @@ export const roles: {
             let source = Game.getObjectById((creep.memory.data as WorkerData).sourceId as Id<StructureStorage | StructureTerminal | StructureContainer | Source>)
 
             if (!source) return false
-            return creep.getFrom(source) === OK
+            creep.getFrom(source)
+            return false
         },
         target: (creep: Creep): boolean => {
             // 刷墙
@@ -431,8 +432,8 @@ export const roles: {
                 creep.log('找不到可用的source')
                 return false
             }
-            const result = creep.getFrom(source)
-            return result === OK || result === ERR_FULL
+            creep.getFrom(source)
+            return false
         },
         // 维持房间能量填充
         target: (creep: Creep): boolean => {
@@ -440,9 +441,7 @@ export const roles: {
             let task = creep.room.nextTransferTaskBy(TASK_EXTENSION)
             if (!task) creep.room.nextTransferTaskBy(TASK_TOWER)
             if (task && (task.type === TASK_EXTENSION || task.type === TASK_TOWER)) {
-                if (transferTaskOperations[task.type].target(creep, task)) {
-                    return true
-                } else return false
+                return transferTaskOperations[task.type].target(creep, task)
             } else {
                 // 将能量放到stroage中
                 if (!creep.room.storage) return false
@@ -486,15 +485,15 @@ export const roles: {
                 return false
             }
         },
+        // [ ] Processor source 实现
         source: (creep: Creep): boolean => {
             // 快死了就拒绝执行任务
             if (creep.ticksToLive && creep.ticksToLive <= 5) return false
-            // TODO 中央物流任务,取出资源
             // 需要任务系统
             return true
         },
+        // [ ] Processor target 实现
         target: (creep: Creep): boolean => {
-            // TODO 中央物流任务,放置资源
             return true
         },
         isNeed: (creep: Creep): boolean => { return true },
@@ -511,6 +510,7 @@ export const roles: {
             if (!data.sourceId) source = Game.getObjectById(data.sourceId as Id<StructureContainer | StructureStorage>)
             // 缓存未找到
             // container 没能量了就尝试从 storage 里获取能量执行任务
+            // [ ] 先找container，再找stroage
             if (!source || source.store[RESOURCE_ENERGY] <= 0) {
                 source = creep.room.storage || null
             }

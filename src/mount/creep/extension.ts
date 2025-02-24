@@ -11,7 +11,7 @@ export default class CreepExtension extends Creep {
         // 检查角色正确否
         if (!(this.memory.role in roles)) {
             this.log(`未知角色`, 'yellow')
-            this.say(`凉了，role:${this.memory.role}`)
+            this.say(`unrole:${this.memory.role}`)
             return
         }
         // 孵化中
