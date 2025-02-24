@@ -1,6 +1,7 @@
 import { dashRange, stanbyRange, minWallHits } from "setting/global"
 import { unserializePos, getSurroundingPos, serializePos, getOppositeDirection } from "utils/path"
 import roles from "creep"
+import { create } from "lodash"
 
 // creep 原型拓展
 export default class CreepExtension extends Creep {
@@ -619,6 +620,25 @@ export default class CreepExtension extends Creep {
         this.memory.ready = false
         this.memory.isStand = false
         return '初始化完成'
+    }
+    /**
+     * 处理掉 creep 身上携带的能量
+     * 运输者在之前处理任务的时候身上可能会残留能量，如果不及时处理的话可能会导致任务处理能力下降
+     * 
+     * @returns 为 true 时代表已经处理完成，可以继续执行任务
+     */
+    public clearStore(type: ResourceConstant): boolean {
+        if (this.store[type] > 0) {
+            if (this.room.storage && this.room.storage.store.getFreeCapacity() >= this.store[type]) {
+                this.giveTo(this.room.storage, type)
+                return false
+            } else {
+                this.drop(type)
+                return true
+            }
+        } else {
+            return true
+        }
     }
 }
 

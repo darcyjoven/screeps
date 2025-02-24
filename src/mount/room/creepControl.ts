@@ -1,6 +1,6 @@
 import { creepDefaultMemory } from "setting/creep";
 import ConfigExtension from "./config";
-import { log } from "./extension";
+import { log } from "./tool";
 
 export default class CreepControl extends ConfigExtension {
     /**

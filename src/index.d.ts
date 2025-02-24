@@ -342,6 +342,7 @@ interface Creep {
   goTo(target: RoomPosition): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND;
   goByCache(): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND;
   log(content: string, color?: Colors, notify?: boolean): void;
+  clearStore(type:ResourceConstant):boolean;
 }
 
 /**************** terminal ********************/
