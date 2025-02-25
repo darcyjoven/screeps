@@ -27,10 +27,9 @@ export const roles: {
             if (!source) {
                 // 找到不属于其它creep的source
                 const sourceFind = _.find(creep.room.getSource(true), (s =>
-                    (!creep.room.memory.source[s.id] ||
-                        creep.room.memory.source[s.id].belong === '' ||
-                        creep.room.memory.source[s.id].belong === creep.name) &&
-                    creep.room.lookForAt(LOOK_CREEPS, s.pos.x, s.pos.y).length === 0
+                    !creep.room.memory.source[s.id] ||
+                    creep.room.memory.source[s.id].belong === '' ||
+                    creep.room.memory.source[s.id].belong === creep.name
                 ))
                 if (sourceFind) {
                     source = Game.getObjectById(sourceFind.id as Id<Source>)
@@ -44,19 +43,10 @@ export const roles: {
             }
             // 无缓存取container
             if (!target) {
-                // 找到container,且不属于其它creep的container
-                const container = _.find(creep.room.getStructure(STRUCTURE_CONTAINER), (s =>
-                    (!creep.room.memory.structure[STRUCTURE_CONTAINER] ||
-                        !creep.room.memory.structure[STRUCTURE_CONTAINER][s.id] ||
-                        !creep.room.memory.structure[STRUCTURE_CONTAINER][s.id].belong ||
-                        creep.room.memory.structure[STRUCTURE_CONTAINER][s.id].belong === creep.id) &&
-                    creep.room.lookForAt(LOOK_CREEPS, s.pos.x, s.pos.y).length === 0
-                    // BUG 如果另一个矿工死亡了，可能会占用container
-                ))
-                if (container) {
-                    target = Game.getObjectById(container.id as Id<StructureContainer>)
-                    creep.room.memory.structure[STRUCTURE_CONTAINER]![container.id].belong = creep.id
-                }
+                const containers = source.pos.findInRange(FIND_STRUCTURES, 1, {
+                    filter: s => s.structureType === STRUCTURE_CONTAINER
+                })
+                if (containers && containers.length > 0) target = containers[0]
             }
             // 再找container工地
             if (!target) {
@@ -134,6 +124,13 @@ export const roles: {
             return false
         },
         isNeed: (creep: Creep) => {
+            console.log('is need',creep.name)
+            // souce.belong 清空
+            _.keys(creep.room.memory.source).forEach(id => {
+                if (creep.room.memory.source[id].belong === creep.name) {
+                    creep.room.memory.source[id].belong = ''
+                }
+            })
             // 如果centerLink已经建立，不需要继续孵化了
             const links = creep.room.find(FIND_MY_STRUCTURES, {
                 filter: s => s.structureType === STRUCTURE_LINK
@@ -227,7 +224,7 @@ export const roles: {
             if (harvestResult === ERR_NOT_IN_RANGE) creep.goTo(source.pos)
             else if (harvestResult === ERR_NOT_ENOUGH_RESOURCES) {
                 // 如果满足下列条件就重新发送 regen_source 任务
-                // TODO 发布任务 PowerTask
+                // [ ] 发布任务 PowerTask
             }
 
             // 快死了就把能量移出去
@@ -248,6 +245,7 @@ export const roles: {
             return creep.store.getUsedCapacity() === 0
         },
         isNeed: (creep: Creep): boolean => {
+            console.log('is need', creep.name)
             if (creep.memory.noNeed === true) return false
             return creep.room.needSpawn(creep.memory.role)
         },
@@ -326,6 +324,7 @@ export const roles: {
             return creep.upgrade() === ERR_NOT_ENOUGH_RESOURCES
         },
         isNeed: (creep: Creep): boolean => {
+            console.log('is need', creep.name)
             if (creep.memory.noNeed === true) return false
             return creep.room.needSpawn(creep.memory.role)
         },
@@ -387,6 +386,7 @@ export const roles: {
             return creep.store.getUsedCapacity() === 0
         },
         isNeed: (creep: Creep): boolean => {
+            console.log('is need', creep.name)
             // 工地都建完就就使命完成
             const targets: ConstructionSite[] = creep.room.find(FIND_MY_CONSTRUCTION_SITES)
             return targets.length > 0 ? true : false
@@ -456,7 +456,8 @@ export const roles: {
         },
         // 能量来源（container）没了就自觉放弃
         isNeed: (creep: Creep): boolean => {
-            if (!_.some(creep.room.sourceContainers, container => container.id === data.sourceId)) return false
+            console.log('is need', creep.name)
+            if (!Game.getObjectById(data.sourceId as Id<StructureContainer>)) return false
             if (creep.memory.noNeed === true) return false
             return creep.room.needSpawn(creep.memory.role)
         },
@@ -506,9 +507,9 @@ export const roles: {
             if (!data.sourceId) source = Game.getObjectById(data.sourceId as Id<StructureContainer | StructureStorage>)
             // 缓存未找到
             // container 没能量了就尝试从 storage 里获取能量执行任务
-            // [ ] 先找container，再找stroage
+            // [x] 先找container，再找stroage
             if (!source || source.store[RESOURCE_ENERGY] <= 0) {
-                source = creep.room.storage || null
+                source = creep.room.getResouceByType(RESOURCE_ENERGY, STRUCTURE_CONTAINER, STRUCTURE_STORAGE) as StructureContainer | StructureStorage | null
             }
             if (!source) {
                 creep.log('找不到可用的source')
@@ -537,6 +538,7 @@ export const roles: {
             } else return true
         },
         isNeed: (creep: Creep): boolean => {
+            console.log('is need', creep.name)
             if (creep.memory.noNeed === true) return false
             return creep.room.needSpawn(creep.memory.role)
         },

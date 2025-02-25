@@ -129,9 +129,9 @@ export default class LayoutExtension extends RoomExtension {
                     info += `建筑类型:${structureType}` + '\n'
                     continue
                 }
-                const result = this.createConstructionSite(structure[0], structure[1], structureType as BuildableStructureConstant)
+                const result = this.createConstructionSite(structure[0] + this.memory.layout.center.x, structure[1] + this.memory.layout.center.y, structureType as BuildableStructureConstant)
                 this.memory.spawnBuilder = true
-                if (result !== OK) info += `新建工地失败-建筑类型:${structureType} 报错代码:${result}` + '\n'
+                if (result !== OK) info += `新建工地失败-建筑类型:${structureType} 报错代码:${result} 位置:x-${structure[0] + this.memory.layout.center.x} y-${structure[1] + this.memory.layout.center.y}` + '\n'
                 else {
                     sites.push(structureType as BuildableStructureConstant)
                 }
@@ -141,6 +141,7 @@ export default class LayoutExtension extends RoomExtension {
             info = `以下是需要手动部署的建筑:\n` + info
             this.log(info, 'new constructure site failed', 'red', true)
         }
+        this.memory.stat.layout = rcl
         return sites
     }
     /**
@@ -214,7 +215,7 @@ export default class LayoutExtension extends RoomExtension {
         })
     }
     /**
-     * [ ] standBy 点位设置
+     * [x] standBy 点位设置
      * 
      * 1. prepare
      * 
@@ -250,7 +251,7 @@ export default class LayoutExtension extends RoomExtension {
         return 'standBy点位置已设置'
     }
     public getCenterPos(...postions: RoomPosition[]): RoomPosition {
-        
+
         return postions[0]
     }
 }

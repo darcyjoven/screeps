@@ -25,7 +25,7 @@ export default class CreepExtension extends Creep {
 
         // 快死的时候处理
         if (this.ticksToLive && this.ticksToLive <= 3) {
-            log('memory', 'tick', Game.time, 'creep', this.name, 'ticksToLive', this.ticksToLive, 'isNeed', creepConfig.isNeed!(this) || false)
+            log('dead', 'tick', Game.time, 'creep', this.name, 'ticksToLive', this.ticksToLive, 'isNeed', creepConfig.isNeed!(this) || false)
             // 释放出禁止通行点
             if (this.memory.isStand) this.room.rmAvoidPos(this.name)
             // BUG harvester未重新孵化

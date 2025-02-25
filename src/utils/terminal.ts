@@ -2,7 +2,6 @@
  * 定义终端帮助文档的输出的样式
  * 基本照抄github.com/hopgoldy/screeps-ai
  */
-import { replace } from "lodash"
 import { colorful } from "./color"
 
 export const createHelp = (...modules: ModuleDescribe[]): string => {
@@ -232,12 +231,13 @@ export function info(module: string[], ...content: any[]): void {
 
 const warnShow: Record<string, boolean> = {
     creep: false,
-    room: true,
+    room: false,
     structure: false,
     global: false,
     setting: false,
     util: false,
     main: false,
+    work: false,
 }
 
 /**
@@ -249,8 +249,12 @@ const warnShow: Record<string, boolean> = {
 export const warn = (module: string[], ...record: [string, any][]) => {
     if (!global.isDebug) return
     if (_.includes(module, 'memory')) {
-        if (!Memory.log) Memory.log = []
-        Memory.log.push(`tick:${Game.time} module:${JSON.stringify(module)} record:${JSON.stringify(record)}`)
+        console.log(module,record)
+        let key: string = `${Game.time}`
+        // if (!Memory.log[Game.time]) Memory.log[Game.time] = []
+        // Memory.log[Game.time].push(`module:${JSON.stringify(module)} record:${JSON.stringify(record)}`)
+        if (!Memory.log[key]) Memory.log[key]=[]
+        Memory.log[key].push(`module:${JSON.stringify(module)} record:${JSON.stringify(record)}`)
         return
     }
     if (module.length <= 0) return

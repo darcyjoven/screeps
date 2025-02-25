@@ -27,6 +27,7 @@ export default class CreepControl extends ConfigExtension {
      * @param state 
      */
     public stateChange(state: OperationState): void {
+        log('memory', 'room', this.name, 'stateChange', state, 'tick', Game.time)
         // 刷新建筑
         this.freshAllStructue()
         // 保存旧的配置,用来判断creep是否需要suicide 
@@ -99,11 +100,11 @@ export default class CreepControl extends ConfigExtension {
         const taskCnt = _.filter(this.memory.task?.spawn || [], t => t.role === role).length
         if (!this.memory.stat) return false
         // 如果大于配置的数量，不需要孵化
-        const configCnt = (this.memory.stat.currentState as Partial<Record<CreepRole, number>>)[role] || 0
-        const cnt = creepCnt + taskCnt - 1
-        log('memory', 'needSpawn', Game.time, 'role', role, 'creepCnt', creepCnt, 'taskCnt', taskCnt, 'configCnt', configCnt)
+        const configCnt = this.memory.stat.creepConfigs[role] || 0
+        const cnt = creepCnt + taskCnt
+        log('needSpawn', 'needSpawn', Game.time, 'role', role, 'creepCnt', creepCnt, 'taskCnt', taskCnt, 'configCnt', configCnt)
         if (cnt > configCnt) return false
-        return false
+        return true
     }
     /**
      * 发布建造者

@@ -1,4 +1,4 @@
-import { merge } from 'lodash'
+import { warn } from 'utils/terminal'
 import mountCreep from './creep'
 import mountGlobal from './global'
 import mountRoom from './room'
@@ -26,6 +26,7 @@ const memoryInit = () => {
     _.difference(_.keys(Memory.rooms), _.keys(Game.rooms)).forEach(name => delete Memory.rooms[name])
     for (const name in Game.rooms) {
         if (!Game.rooms[name].memory.routeCache) {
+            warn(['mount', 'memory'], ['room', name], ['memory init', ''])
             // 开始初始化
             Game.rooms[name].memory.routeCache = {}
             Game.rooms[name].memory.task = {}
@@ -35,10 +36,12 @@ const memoryInit = () => {
             Game.rooms[name].memory.war = false
             Game.rooms[name].memory.layout = {}
             Game.rooms[name].memory.standBy = {}
+            Game.rooms[name].memory.avoidPos = {}
         }
     }
     // 全局Memory初始化
     if (!Memory.bypassRooms) Memory.bypassRooms = []
     if (!Memory.routeCache) Memory.routeCache = {}
     if (!Memory.shareTask) Memory.shareTask = []
+    if (!Memory.log) Memory.log = {}
 }

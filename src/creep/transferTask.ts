@@ -12,7 +12,7 @@ const defaultSoure = (creep: Creep, task: TransferTask, sourceId: string): boole
     return false
 }
 /**
- * //TODO 房间物流任务处理
+ * [ ] 房间物流任务处理
  */
 export const transferTaskOperations: Record<TransferTaskConstant, TransferTaskOperation> = {
     [TASK_EXTENSION]: {

@@ -1,6 +1,7 @@
 import { getBodyConfig } from "setting/creep"
 import { generateCreepId } from "utils/tool"
 import { TASK_EXTENSION } from "setting/global"
+import { log } from "./tool"
 
 export default class SpawnExtension extends StructureSpawn {
     public work(): void {
@@ -68,15 +69,28 @@ export default class SpawnExtension extends StructureSpawn {
         if (!spawnTask) return
 
         const name = `${this.room.name}/${spawnTask.role}/${generateCreepId()}`
-        const body = getBodyConfig(spawnTask.role, this.room.controller?.level || 1)
+        let level = this.room.memory.stat.rcl || 1
+        let body = getBodyConfig(spawnTask.role, level)
+        // 如果孵化不了就降级
+        log('spawn', 'room', this.room.name, 'avl', this.room.energyAvailable, 'cap', this.room.energyCapacityAvailable, 'body', body, 'level', level)
+        if (this.room.energyAvailable === this.room.energyCapacityAvailable) {
+            while (level > 0) {
+                body = getBodyConfig(spawnTask.role, level)
+                const result = this.spawnCreep(body, name, { dryRun: true })
+                if (result === ERR_NOT_ENOUGH_ENERGY) {
+                    level -= 1
+                } else {
+                    break
+                }
+            }
+            log('spawn', 'room', this.room.name, 'body inwhile', body, 'level', level)
+        }
+        log('spawn', 'room', this.room.name, 'body after while', body, 'level', level)
         const result = this.spawnCreep(body, name, { memory: spawnTask.memory })
         // 如果能量不足将当前任务放到最后
         if (result === OK) this.room.finishSpawnTask()
-        else if (result === ERR_NOT_ENOUGH_ENERGY) {
-            return
-            // [ ] 先不使用此功能，资源不足会频繁调用
-            // this.room.addSpawnTask(false, spawnTask)
-            // this.room.finishSpawnTask()
-        }
+        // [ ] 先不使用此功能，资源不足会频繁调用
+        // this.room.addSpawnTask(false, spawnTask)
+        // this.room.finishSpawnTask() 
     }
 }

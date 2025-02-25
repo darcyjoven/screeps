@@ -87,7 +87,9 @@ interface Memory {
       lastUsed: number
     }
   }
-  log?: string[]
+  log: {
+    [tick: string]: string[]
+  }
 }
 // Creep的内存管理
 interface CreepMemory {
@@ -245,7 +247,7 @@ interface RoomMemory {
     center?: { x: number, y: number }
   }
   upgraderPos?: { x: number, y: number }[]
-  avoidPos?: {
+  avoidPos: {
     [key: string]: string
   }
   spawnBuilder?: boolean
@@ -438,3 +440,9 @@ interface TransferTaskOperation {
 
 type StoreStructureConstant = STRUCTURE_CONTAINER | STRUCTURE_STORAGE | STRUCTURE_TERMINAL
 type StoreStructure = StructureContainer | StructureStorage | StructureTerminal
+
+
+interface IAlias {
+  alias: string
+  exec: () => string
+}
