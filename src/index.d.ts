@@ -60,7 +60,7 @@ type WorkerData = {
   sourceId: string
   targetId: string
 }
-type ProcessorData = {
+type Pos = {
   x: number
   y: number
 }
@@ -73,6 +73,7 @@ type HealerData = {
   targetFlagName: string
   reSpawn: boolean
 }
+type ProcessorData = Pos
 type CreepData = EmptyData | HarvesterData | WorkerData | ProcessorData | RemoteHarvesterData |
   HealerData
 
@@ -218,9 +219,10 @@ interface RoomMemory {
     }
   },
   // 准备的点
-  standBy?: {
-    x: number,
-    y: number
+  standBy: {
+    processor?: Pos,
+    defender?: Pos,
+    prepare?: Pos,
   },
   // 建筑工地相关
   buildStructure?: BuildStructure
@@ -242,8 +244,6 @@ interface RoomMemory {
   layout: {
     center?: { x: number, y: number }
   }
-  //Processor 待命位置
-  processor: ProcessorData
   upgraderPos?: { x: number, y: number }[]
   avoidPos?: {
     [key: string]: string
@@ -299,6 +299,8 @@ interface Room {
   getSource(fresh?: boolean): SourceMemory[]
   freshAllStructue(): string
   initUpgraderPos(): void
+  getResouceAvailable(resouce?: ResourceConstant, distance?: { pos?: RoomPosition }, amount?: boolean, ...types: StoreStructureConstant[]): StoreStructure | null
+  getResouceByType(resouce?: ResourceConstant, ...types: StoreStructureConstant[]): StoreStructure | Source | null
 }
 
 type Colors = 'green' | 'blue' | 'yellow' | 'red'
@@ -342,7 +344,7 @@ interface Creep {
   goTo(target: RoomPosition): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND;
   goByCache(): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND;
   log(content: string, color?: Colors, notify?: boolean): void;
-  clearStore(type:ResourceConstant):boolean;
+  clearStore(type: ResourceConstant): boolean;
 }
 
 /**************** terminal ********************/
@@ -433,3 +435,6 @@ interface TransferTaskOperation {
   // creep 非工作(收集资源时)执行的方法
   source: (creep: Creep, task: TransferTask, sourceId: string) => boolean
 }
+
+type StoreStructureConstant = STRUCTURE_CONTAINER | STRUCTURE_STORAGE | STRUCTURE_TERMINAL
+type StoreStructure = StructureContainer | StructureStorage | StructureTerminal

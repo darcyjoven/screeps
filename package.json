@@ -6,6 +6,7 @@
   "scripts": {
     "build": "rollup -c --bundleConfigAsCjs",
     "push-ptr": "rollup -c --bundleConfigAsCjs --environment DEST:ptr",
+    "push-main": "rollup -c --bundleConfigAsCjs --environment DEST:main",
     "test": "jest src/",
     "test-c": "jest --coverage src/"
   },

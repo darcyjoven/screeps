@@ -3,7 +3,7 @@ import creepControl from "./creepControl";
 
 export default class RoomExtension extends creepControl {
     public work(): void {
-        // [ ] 初始化待命点，processor、defense、运维
+        // [x] 初始化待命点，processor、defense、运维
         // 判断container建立完成
         this.toContianerState()
         // creep运维数量控制

@@ -104,4 +104,72 @@ export default class SearchExtension extends LayoutExtension {
         this.getStructure(STRUCTURE_INVADER_CORE, true)
         return '刷新完成....'
     }
+
+    /**
+     * [x]寻找房间中符合条件的第一个建筑
+     * 
+     * 先按照数量排序，再按照数量排序
+     * @param resouce 资源类型
+     * @param range 按照距离排序
+     * @param amount 按照数量排序
+     * @param types 查询的建筑类型
+     * @returns 返回符合条件的第一个建筑
+     */
+    public getResouceAvailable(
+        resouce: ResourceConstant = RESOURCE_ENERGY,
+        distance: { pos?: RoomPosition } = {},
+        amount: boolean,
+        ...types: StoreStructureConstant[]): StoreStructure | null {
+
+        // 获取指定类型建筑
+        let structures: StoreStructure[] = []
+
+        types.forEach(t => {
+            _.keys(this.memory.structure[t]).forEach(s => {
+                const tmp = Game.getObjectById(s as Id<StoreStructure>)
+                if (tmp) {
+                    if (tmp.store[resouce] > 0) structures.push(tmp)
+                }
+            })
+        })
+
+        if (!structures || structures.length <= 0) return null
+
+        // 距离排序
+        if (distance.pos) {
+            structures.sort((a, b) => distance.pos!.getRangeTo(a) - distance.pos!.getRangeTo(b))
+        }
+        // 数量排序
+        if (amount) {
+            structures.sort((a, b) => (a as StoreStructure).store[resouce] - (b as StoreStructure).store[resouce])
+        }
+        return structures[0] as StoreStructure || null
+    }
+    /**
+     * 按照建筑类型获取有资源的建筑
+     * @param resouce 资源类型
+     * @param types 建筑类型
+     * @returns 
+     */
+    public getResouceByType(
+        resouce: ResourceConstant = RESOURCE_ENERGY,
+        ...types: StoreStructureConstant[]): StoreStructure | Source | null {
+
+        if (types.length == 0) return null
+        let structure: StoreStructure | Source | null = null
+        types.forEach(t => {
+            if (structure) return
+            _.keys(this.memory.structure[t]).forEach(s => {
+                if (structure) return
+                const tmp = Game.getObjectById(s as Id<StoreStructure>)
+                if (tmp && tmp.store[resouce] > 0) {
+                    structure = tmp
+                }
+            })
+        })
+        if (resouce === RESOURCE_ENERGY && !structure) {
+            structure = Game.getObjectById(_.first(_.keys(this.memory.source)) as Id<Source>)
+        }
+        return structure
+    }
 }

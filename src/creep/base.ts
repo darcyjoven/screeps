@@ -471,10 +471,6 @@ export const roles: {
         // 移动到指定位置
         prepare: (creep: Creep): boolean => {
             if (!data.x && !data.y) {
-                creep.memory.data = creep.room.memory.processor
-                data = creep.memory.data as ProcessorData
-            }
-            if (!data.x && !data.y) {
                 creep.log('无待命位置，不移动', 'yellow')
                 creep.memory.ready = true
                 return true

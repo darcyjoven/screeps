@@ -248,7 +248,7 @@ const warnShow: Record<string, boolean> = {
  */
 export const warn = (module: string[], ...record: [string, any][]) => {
     if (!global.isDebug) return
-    if (_.some(module, 'memory')) {
+    if (_.includes(module, 'memory')) {
         if (!Memory.log) Memory.log = []
         Memory.log.push(`tick:${Game.time} module:${JSON.stringify(module)} record:${JSON.stringify(record)}`)
         return

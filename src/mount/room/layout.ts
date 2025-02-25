@@ -1,5 +1,6 @@
 import { baseLayout } from "setting/global";
 import RoomExtension from "./extension";
+import room from ".";
 /**
  * 布局规划
  */
@@ -211,5 +212,45 @@ export default class LayoutExtension extends RoomExtension {
         positions.forEach((p) => {
             this.memory.upgraderPos?.push(p)
         })
+    }
+    /**
+     * [ ] standBy 点位设置
+     * 
+     * 1. prepare
+     * 
+     * 2. processor
+     * 
+     * 3. defender
+     * @returns 
+     */
+    public setStandByPos(): string {
+        if (!this.memory.standBy.prepare) {
+            if (Game.flags['prepare']) this.memory.standBy.prepare = Game.flags['prepare'].pos
+            else {
+                const suggestPos: RoomPosition = this.getCenterPos(
+                    ..._.values(this.memory.source).map(s => new RoomPosition(s.pos.x, s.pos.y, this.name)),
+                    ...this.find(FIND_MINERALS).filter(m => m !== null).map(m => m.pos),
+                )
+                suggestPos.createFlag('prepare')
+                return `prepare 建议点位 ${suggestPos}`
+            }
+        }
+        if (!this.memory.standBy.processor) {
+            if (Game.flags['processor']) this.memory.standBy.prepare = Game.flags['processor'].pos
+            else {
+                return `请建立一个名称为‘porocessor'的Flag`
+            }
+        }
+        if (!this.memory.standBy.defender) {
+            if (Game.flags['defender']) this.memory.standBy.prepare = Game.flags['defender'].pos
+            else {
+                return `defender'的Flag`
+            }
+        }
+        return 'standBy点位置已设置'
+    }
+    public getCenterPos(...postions: RoomPosition[]): RoomPosition {
+        
+        return postions[0]
     }
 }

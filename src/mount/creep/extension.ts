@@ -1,7 +1,7 @@
 import { dashRange, stanbyRange, minWallHits } from "setting/global"
 import { unserializePos, getSurroundingPos, serializePos, getOppositeDirection } from "utils/path"
 import roles from "creep"
-import { create } from "lodash"
+import { warn } from "utils/terminal"
 
 // creep 原型拓展
 export default class CreepExtension extends Creep {
@@ -25,6 +25,7 @@ export default class CreepExtension extends Creep {
 
         // 快死的时候处理
         if (this.ticksToLive && this.ticksToLive <= 3) {
+            log('memory', 'tick', Game.time, 'creep', this.name, 'ticksToLive', this.ticksToLive, 'isNeed', creepConfig.isNeed!(this) || false)
             // 释放出禁止通行点
             if (this.memory.isStand) this.room.rmAvoidPos(this.name)
             // BUG harvester未重新孵化
@@ -81,34 +82,40 @@ export default class CreepExtension extends Creep {
      * 指定位置待命
      */
     public standBy(): void {
-        if (!this.room.memory.standBy) {
-            this.say('没有StandBy点')
+        let pos: Pos = { x: -1, y: -1 }
+        switch (this.memory.role) {
+            case 'Processor': pos = this.memory.data as ProcessorData; break
+            case 'Defender': pos = this.room.memory.standBy.defender || pos; break
+            default: pos = this.room.memory.standBy.prepare || pos
+        }
+        if (pos.x === -1 || pos.y === -1) {
+            this.say('no standBy pos')
             return
         }
         if (this.memory.isStandBy) {
             // 准备完成
-            if (this.pos.x !== this.room.memory.standBy.x || this.pos.y !== this.room.memory.standBy.y) this.say('standBy')
+            if (this.pos.x !== pos.x || this.pos.y !== pos.y) this.say('standBy')
             // 还未移动好，继续移动
-            else this.goTo(getSurroundingPos(this.room.memory.standBy.x, this.room.memory.standBy.y, this.room.name))
+            else this.goTo(getSurroundingPos(pos.x, pos.y, this.room.name))
         } else {
-            if (this.pos.x !== this.room.memory.standBy.x || this.pos.y !== this.room.memory.standBy.y) {
+            if (this.pos.x !== pos.x || this.pos.y !== pos.y) {
                 // 还未移动到standby点处
-                this.goTo(new RoomPosition(this.room.memory.standBy.x, this.room.memory.standBy.y, this.room.name))
+                this.goTo(new RoomPosition(pos.x, pos.y, this.room.name))
             } else {
                 // 到了移动到周围，并准备好
-                this.goTo(getSurroundingPos(this.room.memory.standBy.x, this.room.memory.standBy.y, this.room.name))
+                this.goTo(getSurroundingPos(pos.x, pos.y, this.room.name))
                 this.memory.ready = true
                 this.memory.isStandBy = true
             }
         }
 
 
-        if (!this.memory.isStandBy && (this.pos.x !== this.room.memory.standBy.x ||
-            this.pos.y !== this.room.memory.standBy.y)) {
+        if (!this.memory.isStandBy && (this.pos.x !== pos.x ||
+            this.pos.y !== pos.y)) {
             // 还未移动到standby点处
-            this.goTo(new RoomPosition(this.room.memory.standBy.x, this.room.memory.standBy.y, this.room.name))
-        } else if (this.pos.x !== this.room.memory.standBy.x && this.pos.y !== this.room.memory.standBy.y) {
-            this.goTo(getSurroundingPos(this.room.memory.standBy.x, this.room.memory.standBy.y, this.room.name))
+            this.goTo(new RoomPosition(pos.x, pos.y, this.room.name))
+        } else if (this.pos.x !== pos.x && this.pos.y !== pos.y) {
+            this.goTo(getSurroundingPos(pos.x, pos.y, this.room.name))
             this.memory.ready = true
             this.memory.isStandBy = true
         }
@@ -463,10 +470,10 @@ export default class CreepExtension extends Creep {
      * @returns 
      */
     public race(target: RoomPosition): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND {
-
-        if (!this.room.memory.standBy ||// 没有standby
-            (this.room.memory.standBy.x === this.pos.x && this.room.memory.standBy.y === this.pos.y) || // 已经在standby上
-            (this.pos.getRangeTo(this.room.memory.standBy.x, this.room.memory.standBy.y) > stanbyRange) // 距离standby太远
+        const pos: Pos = this.room.memory.standBy.prepare || { x: -1, y: -1 }
+        if ((pos.x < 0 || pos.y < 0) ||// 没有standby
+            (pos.x === this.pos.x && pos.y === this.pos.y) || // 已经在standby上
+            (this.pos.getRangeTo(pos.x, pos.y) > stanbyRange) // 距离standby太远
         ) {
             // 查看是否有缓存路径
             const routeKey = `${serializePos(this.pos)},${serializePos(target)}`
@@ -506,7 +513,7 @@ export default class CreepExtension extends Creep {
             return this.goByCache()
         } else {
             // 在standby的范围内，先移动到standby，再去寻路
-            return this.dash(new RoomPosition(this.room.memory.standBy.x, this.room.memory.standBy.y, this.room.name))
+            return this.dash(new RoomPosition(pos.x, pos.y, this.room.name))
         }
     }
     /**
@@ -515,11 +522,12 @@ export default class CreepExtension extends Creep {
      * @returns 
      */
     public marathon(target: RoomPosition): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND {
+        const pos: Pos = this.room.memory.standBy.prepare || { x: -1, y: -1 }
         // 移动到standBy
         // Creep在standby上 或者没有standby  寻路去target
-        if (!this.room.memory.standBy ||// 没有standby
-            (this.room.memory.standBy.x === this.pos.x && this.room.memory.standBy.y === this.pos.y) || // 已经在standby上
-            (this.pos.getRangeTo(this.room.memory.standBy.x, this.room.memory.standBy.y) > stanbyRange) // 距离standby太远
+        if (!pos ||// 没有standby
+            (pos.x === this.pos.x && pos.y === this.pos.y) || // 已经在standby上
+            (this.pos.getRangeTo(pos.x, pos.y) > stanbyRange) // 距离standby太远
         ) {
             // 查看是否有缓存路径      
             const routeKey = `${serializePos(this.pos)},${serializePos(target)}`
@@ -575,7 +583,7 @@ export default class CreepExtension extends Creep {
             return this.goByCache()
         } else {
             // 在standby的范围内，先移动到standby，再去寻路
-            return this.dash(new RoomPosition(this.room.memory.standBy.x, this.room.memory.standBy.y, this.room.name))
+            return this.dash(new RoomPosition(pos.x, pos.y, this.room.name))
         }
     }
 
@@ -588,8 +596,9 @@ export default class CreepExtension extends Creep {
             x: this.pos.x,
             y: this.pos.y
         }
+        const pos: Pos = this.room.memory.standBy.prepare || { x: -1, y: -1 }
         // 距离standby一个格子内，从standby开始计算初始位置
-        if (this.room.memory.standBy) if (this.pos.inRangeTo(this.room.memory.standBy.x, this.room.memory.standBy.y, 1)) fromPos = this.room.memory.standBy
+        if (pos.x >= 0 && pos.y >= 0) if (this.pos.inRangeTo(pos.x, pos.y, 1)) fromPos = pos
         // 跨房间
         if (this.room.name !== target.roomName) return this.marathon(target)
         // 距离超过1/4，要去缓存路径
@@ -669,4 +678,23 @@ const structureInfo = (structure: Structure<StructureConstant>): void => {
             if (structure.room.memory.stat && structure.room.memory.stat.currentState === 'storage') structure.room.stateChange('link')
             break
     }
+}
+
+const logShow: Record<string, boolean> = {
+    dead: true,
+    memory: true,
+}
+
+export const log = (func: string, ...args: any[]) => {
+    if (!logShow[func]) return
+
+    let content: [any, any][] = []
+    let i = 0
+    for (; i < args.length - 1; i += 2) {
+        content.push([args[i], args[i + 1]])
+    }
+    if (i < args.length - 1) {
+        content.push(['unkey', args[i]])
+    }
+    warn(['room', func], ...content)
 }

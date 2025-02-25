@@ -3,6 +3,7 @@ import { warn } from "utils/terminal";
 const infoShow: Record<string, boolean> = {
     task: false,
     release: false,
+    memory: true,
 }
 
 export const log = (func: string, ...args: any[]): void => {

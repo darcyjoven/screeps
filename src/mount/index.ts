@@ -34,7 +34,7 @@ const memoryInit = () => {
             Game.rooms[name].memory.source = {}
             Game.rooms[name].memory.war = false
             Game.rooms[name].memory.layout = {}
-            Game.rooms[name].memory.processor = { x: 0, y: 0 }
+            Game.rooms[name].memory.standBy = {}
         }
     }
     // 全局Memory初始化

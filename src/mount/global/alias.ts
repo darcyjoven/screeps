@@ -115,6 +115,17 @@ export default [
                 { name: 'role', describe: '要孵化的角色' }
               ],
               functionName: 'room.addSpawn'
+            },
+            /**
+             * 设置中心点
+             */
+            {
+              title: '设置中心点',
+              describe: '在房间内设置中心点',
+              params: [
+                { name: 'flagName', describe: 'Flag名称' }
+              ],
+              functionName: 'room.setCenter'
             }
           ]
         }, {

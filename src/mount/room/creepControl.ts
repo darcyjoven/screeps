@@ -91,17 +91,18 @@ export default class CreepControl extends ConfigExtension {
      * 
      */
     public needSpawn(role: CreepRole): boolean {
-        let cnt = 0
         // 当前存活数量
-        cnt += this.find(FIND_MY_CREEPS, {
+        const creepCnt = this.find(FIND_MY_CREEPS, {
             filter: s => s.memory.role === role
         }).length
         // 孵化队列
-        cnt += _.filter(this.memory.task?.spawn || [], t => t.role === role).length
-        cnt -= 1
+        const taskCnt = _.filter(this.memory.task?.spawn || [], t => t.role === role).length
         if (!this.memory.stat) return false
         // 如果大于配置的数量，不需要孵化
-        if (cnt > ((this.memory.stat.currentState as Partial<Record<CreepRole, number>>)[role] || 0)) return false
+        const configCnt = (this.memory.stat.currentState as Partial<Record<CreepRole, number>>)[role] || 0
+        const cnt = creepCnt + taskCnt - 1
+        log('memory', 'needSpawn', Game.time, 'role', role, 'creepCnt', creepCnt, 'taskCnt', taskCnt, 'configCnt', configCnt)
+        if (cnt > configCnt) return false
         return false
     }
     /**
