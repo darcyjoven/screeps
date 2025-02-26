@@ -84,6 +84,7 @@ interface Memory {
   routeCache: {
     [routeKey: string]: {
       path: string,
+      used?: number,
       lastUsed: number
     }
   }
@@ -91,6 +92,7 @@ interface Memory {
     [tick: string]: string[]
   }
 }
+type MoveConstant = 'race' | 'dash'
 // Creep的内存管理
 interface CreepMemory {
   // 是否去对穿
@@ -106,8 +108,8 @@ interface CreepMemory {
   isStand: boolean
   data: CreepData
   goCache: boolean
-  move?: {
-    far: boolean
+  move: {
+    far?: MoveConstant
     // 序列化之后的路径信息
     path?: string
     // 移动索引，标志 creep 现在走到的第几个位置
@@ -303,6 +305,7 @@ interface Room {
   initUpgraderPos(): void
   getResouceAvailable(resouce?: ResourceConstant, distance?: { pos?: RoomPosition }, amount?: boolean, ...types: StoreStructureConstant[]): StoreStructure | null
   getResouceByType(resouce?: ResourceConstant, ...types: StoreStructureConstant[]): StoreStructure | Source | null
+  hasFiller(): boolean
 }
 
 type Colors = 'green' | 'blue' | 'yellow' | 'red'
@@ -322,15 +325,15 @@ interface Creep {
   // 是否允许对穿
   work(): void;
   isStand(): void;
-  standBy(): void;
+  standBy(): ScreepsReturnCode;
   chkEnemy(): boolean;
   defense(): void;
   cross(direction: DirectionConstant): OK | ERR_BUSY | ERR_NOT_FOUND;
   requireCross(direction: DirectionConstant): OK | ERR_BUSY;
   upgrade(): ScreepsReturnCode;
-  buildStructure(): CreepActionReturnCode | ERR_NOT_ENOUGH_RESOURCES | ERR_RCL_NOT_ENOUGH | ERR_NOT_FOUND;
+  buildStructure(): ScreepsReturnCode
   nextStructure(): ConstructionSite | undefined | null;
-  fillWall(): OK | OK | ERR_NOT_FOUND
+  fillWall(): ScreepsReturnCode
   getFrom(target: Structure | Source): ScreepsReturnCode;
   giveTo(target: Structure, RESOURCE: ResourceConstant): ScreepsReturnCode;
   attackFlag(flag: string, healerName?: string): boolean;
@@ -341,12 +344,14 @@ interface Creep {
   serializePath(positions: PathStep[]): string;
   _move(target: DirectionConstant): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND;
   dash(target: RoomPosition): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND;
-  race(target: RoomPosition): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND;
   marathon(target: RoomPosition): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND;
   goTo(target: RoomPosition): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND;
   goByCache(): CreepMoveReturnCode | ERR_NO_PATH | ERR_INVALID_TARGET | ERR_NOT_FOUND;
   log(content: string, color?: Colors, notify?: boolean): void;
   clearStore(type: ResourceConstant): boolean;
+  afk(): void
+  reGo(): void
+  init(): string
 }
 
 /**************** terminal ********************/

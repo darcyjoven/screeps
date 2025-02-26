@@ -180,6 +180,11 @@ const alias: IAlias[] = [
                                 { name: 'flagName', describe: 'Flag名称' }
                             ],
                             functionName: 'room.setCenter'
+                        }, {
+
+                            title: '设置stanBy点',
+                            describe: '设置stanBy点,需要先建立Flag',
+                            functionName: "Game.rooms['W1N1'].setStandByPos"
                         }
                     ]
                 }, {

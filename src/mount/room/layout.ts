@@ -237,13 +237,13 @@ export default class LayoutExtension extends RoomExtension {
             }
         }
         if (!this.memory.standBy.processor) {
-            if (Game.flags['processor']) this.memory.standBy.prepare = Game.flags['processor'].pos
+            if (Game.flags['processor']) this.memory.standBy.processor = Game.flags['processor'].pos
             else {
                 return `请建立一个名称为‘porocessor'的Flag`
             }
         }
         if (!this.memory.standBy.defender) {
-            if (Game.flags['defender']) this.memory.standBy.prepare = Game.flags['defender'].pos
+            if (Game.flags['defender']) this.memory.standBy.defender = Game.flags['defender'].pos
             else {
                 return `defender'的Flag`
             }

@@ -7,7 +7,7 @@ import { warn } from "utils/terminal";
 // This utility uses source maps to get the line numbers and file names of the original, TS source code
 export const loop = ErrorMapper.wrapLoop(() => {
     global.isDebug = true
-    warn(['main'], ['tick', Game.time])
+    if (Game.time % 10 == 0) warn(['main'], ['tick', Game.time])
     // 挂载
     mount()
     // 开始一轮工作

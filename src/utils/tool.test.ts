@@ -1,5 +1,4 @@
-import { remove } from 'lodash'
-import { removeArray } from './tool'
+import { removeArray, numberToMultiChar } from './tool'
 
 describe('tool 测试', () => {
     const array = ['list', 'map', 'struct', 'class', 'channel', 'class', 'array', 'class']
@@ -25,5 +24,9 @@ describe('tool 测试', () => {
     it('删除不存在的元素', () => {
         const result = removeArray(array, item => item === 'stack')
         expect(result).toHaveLength(8)
+    })
+    it('测试numberToMultiChar', () => {
+        let str = numberToMultiChar(0)
+        expect(str).toEqual('00')
     })
 })

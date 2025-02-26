@@ -59,6 +59,7 @@ export const roles: {
             // 这一步为了走到目的地,放下container工地
             if (!target) target = source
             creep.memory.data = { targetId: target.id, sourceId: source.id } as HarvesterData
+            creep.memory.ready = true
             const range = target instanceof Source ? 1 : 0
             // 移动到指定位置
             creep.goTo(target.pos)
@@ -80,6 +81,7 @@ export const roles: {
             let target = Game.getObjectById((creep.memory.data as HarvesterData).targetId as Id<StructureContainer | Source>)
             // 存在 container，把血量修满
             if (target && target instanceof StructureContainer) {
+                // [ ] container 死亡了
                 creep.repair(target)
                 // 血修满了就正式进入采集阶段
                 return target.hits >= target.hitsMax
@@ -124,7 +126,6 @@ export const roles: {
             return false
         },
         isNeed: (creep: Creep) => {
-            console.log('is need',creep.name)
             // souce.belong 清空
             _.keys(creep.room.memory.source).forEach(id => {
                 if (creep.room.memory.source[id].belong === creep.name) {
@@ -245,7 +246,6 @@ export const roles: {
             return creep.store.getUsedCapacity() === 0
         },
         isNeed: (creep: Creep): boolean => {
-            console.log('is need', creep.name)
             if (creep.memory.noNeed === true) return false
             return creep.room.needSpawn(creep.memory.role)
         },
@@ -321,10 +321,13 @@ export const roles: {
             return false
         },
         target: (creep: Creep): boolean => {
-            return creep.upgrade() === ERR_NOT_ENOUGH_RESOURCES
+            const result = creep.upgrade()
+            if (result === ERR_NOT_ENOUGH_RESOURCES) {
+                creep.afk()
+                return true
+            } else return false
         },
         isNeed: (creep: Creep): boolean => {
-            console.log('is need', creep.name)
             if (creep.memory.noNeed === true) return false
             return creep.room.needSpawn(creep.memory.role)
         },
@@ -382,11 +385,13 @@ export const roles: {
             else if (creep.buildStructure() !== ERR_NOT_FOUND) { }
             // upgrader
             else if (creep.upgrade()) { }
-
-            return creep.store.getUsedCapacity() === 0
+            if (creep.store.getUsedCapacity() === 0) {
+                creep.afk()
+                return true
+            }
+            return false
         },
         isNeed: (creep: Creep): boolean => {
-            console.log('is need', creep.name)
             // 工地都建完就就使命完成
             const targets: ConstructionSite[] = creep.room.find(FIND_MY_CONSTRUCTION_SITES)
             return targets.length > 0 ? true : false
@@ -427,9 +432,11 @@ export const roles: {
         source: (creep: Creep): boolean => {
             if (creep.store[RESOURCE_ENERGY] > 0) return true
             const source = Game.getObjectById((creep.memory.data as WorkerData).sourceId as Id<StructureContainer | StructureStorage>)
+            // [x] 找不到重新prepare
             if (!source) {
                 creep.say('无souce')
                 creep.log('找不到可用的source')
+                creep.init()
                 return false
             }
             creep.getFrom(source)
@@ -449,14 +456,15 @@ export const roles: {
                 // source container 还有 harvester 维护时才会把能量转移至 storage
                 // 否则结合 source 阶段，filler 会在 container 等待老化时在 storage 旁边无意义举重
                 if (source && source.store[RESOURCE_ENERGY] > 0) creep.giveTo(creep.room.storage, RESOURCE_ENERGY)
-                else creep.say('无事可做💤')
+                else {
+                    creep.upgrade()
+                }
                 if (creep.store[RESOURCE_ENERGY] <= 0) return true
                 return false
             }
         },
         // 能量来源（container）没了就自觉放弃
         isNeed: (creep: Creep): boolean => {
-            console.log('is need', creep.name)
             if (!Game.getObjectById(data.sourceId as Id<StructureContainer>)) return false
             if (creep.memory.noNeed === true) return false
             return creep.room.needSpawn(creep.memory.role)
@@ -538,7 +546,6 @@ export const roles: {
             } else return true
         },
         isNeed: (creep: Creep): boolean => {
-            console.log('is need', creep.name)
             if (creep.memory.noNeed === true) return false
             return creep.room.needSpawn(creep.memory.role)
         },

@@ -102,7 +102,7 @@ export default class CreepControl extends ConfigExtension {
         // 如果大于配置的数量，不需要孵化
         const configCnt = this.memory.stat.creepConfigs[role] || 0
         const cnt = creepCnt + taskCnt
-        log('needSpawn', 'needSpawn', Game.time, 'role', role, 'creepCnt', creepCnt, 'taskCnt', taskCnt, 'configCnt', configCnt)
+        log('memory', 'needSpawn', '', 'role', role, 'creepCnt', creepCnt, 'taskCnt', taskCnt, 'configCnt', configCnt)
         if (cnt > configCnt) return false
         return true
     }

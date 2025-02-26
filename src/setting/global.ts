@@ -1,5 +1,5 @@
 // 不缓存路径的最长距离
-export const dashRange = 18
+export const dashRange = 30
 // 寻路去standby的最大范围
 export const stanbyRange = 4
 // 提供给filler使用的安全能量库存

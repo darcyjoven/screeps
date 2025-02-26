@@ -1,7 +1,6 @@
 import { getBodyConfig } from "setting/creep"
-import { generateCreepId } from "utils/tool"
 import { TASK_EXTENSION } from "setting/global"
-import { log } from "./tool"
+import { numberToMultiChar } from "utils/tool"
 
 export default class SpawnExtension extends StructureSpawn {
     public work(): void {
@@ -68,29 +67,44 @@ export default class SpawnExtension extends StructureSpawn {
         const spawnTask = this.room.nextSpawnTask()
         if (!spawnTask) return
 
-        const name = `${this.room.name}/${spawnTask.role}/${generateCreepId()}`
+        const name = getCreepName(this.room.name, spawnTask.role)
         let level = this.room.memory.stat.rcl || 1
         let body = getBodyConfig(spawnTask.role, level)
         // 如果孵化不了就降级
-        log('spawn', 'room', this.room.name, 'avl', this.room.energyAvailable, 'cap', this.room.energyCapacityAvailable, 'body', body, 'level', level)
-        if (this.room.energyAvailable === this.room.energyCapacityAvailable) {
-            while (level > 0) {
-                body = getBodyConfig(spawnTask.role, level)
-                const result = this.spawnCreep(body, name, { dryRun: true })
-                if (result === ERR_NOT_ENOUGH_ENERGY) {
+        let result = this.spawnCreep(body, name, { memory: spawnTask.memory })
+        if (result === ERR_NOT_ENOUGH_ENERGY) {
+            if (this.room.energyAvailable === this.room.energyCapacityAvailable || !this.room.hasFiller()) {
+                while (level > 1) {
                     level -= 1
-                } else {
-                    break
+                    body = getBodyConfig(spawnTask.role, level)
+                    result = this.spawnCreep(body, name, { memory: spawnTask.memory })
+                    if (result !== ERR_NOT_ENOUGH_ENERGY) {
+                        break
+                    }
                 }
             }
-            log('spawn', 'room', this.room.name, 'body inwhile', body, 'level', level)
         }
-        log('spawn', 'room', this.room.name, 'body after while', body, 'level', level)
-        const result = this.spawnCreep(body, name, { memory: spawnTask.memory })
         // 如果能量不足将当前任务放到最后
         if (result === OK) this.room.finishSpawnTask()
         // [ ] 先不使用此功能，资源不足会频繁调用
         // this.room.addSpawnTask(false, spawnTask)
         // this.room.finishSpawnTask() 
     }
+}
+
+/**
+ * 
+ * @param roomMame 获得creep名称
+ * @param role 
+ * @returns 
+ */
+const getCreepName = (roomMame: string, role: CreepRole): string => {
+    let cnt: number = 0
+    let name: string = ''
+    while (cnt <= 62 * 62) {
+        name = `${roomMame}/${role}${numberToMultiChar(cnt)}`
+        if (!!Game.creeps[name]) cnt++
+        else break
+    }
+    return name
 }

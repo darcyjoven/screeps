@@ -166,7 +166,7 @@ export function getBodyConfig(role: CreepRole, controllerLevel: number): BodyPar
 
 export const creepDefaultMemory: Record<CreepRole, CreepMemory> = {
   RemoteHauler: {
-    crossable: false,
+    crossable: true,
     standed: false,
     role: "RemoteHauler",
     ready: false,
@@ -174,10 +174,11 @@ export const creepDefaultMemory: Record<CreepRole, CreepMemory> = {
     isStand: false,
     data: {},
     goCache: false,
-    working: false
+    working: false,
+    move: { index: 0 }
   },
   Harvester: {
-    crossable: false,
+    crossable: true,
     standed: false,
     role: "Harvester",
     ready: false,
@@ -185,10 +186,11 @@ export const creepDefaultMemory: Record<CreepRole, CreepMemory> = {
     isStand: false,
     data: {},
     goCache: false,
-    working: false
+    working: false,
+    move: { index: 0 }
   },
   Worker: {
-    crossable: false,
+    crossable: true,
     standed: false,
     role: "Worker",
     ready: false,
@@ -196,10 +198,11 @@ export const creepDefaultMemory: Record<CreepRole, CreepMemory> = {
     isStand: false,
     data: {},
     goCache: false,
-    working: false
+    working: false,
+    move: { index: 0 }
   },
   Hauler: {
-    crossable: false,
+    crossable: true,
     standed: false,
     role: "Hauler",
     ready: false,
@@ -207,10 +210,11 @@ export const creepDefaultMemory: Record<CreepRole, CreepMemory> = {
     isStand: false,
     data: {},
     goCache: false,
-    working: false
+    working: false,
+    move: { index: 0 }
   },
   Collector: {
-    crossable: false,
+    crossable: true,
     standed: false,
     role: "Collector",
     ready: false,
@@ -218,10 +222,11 @@ export const creepDefaultMemory: Record<CreepRole, CreepMemory> = {
     isStand: false,
     data: {},
     goCache: false,
-    working: false
+    working: false,
+    move: { index: 0 }
   },
   Upgrader: {
-    crossable: false,
+    crossable: true,
     standed: false,
     role: "Upgrader",
     ready: false,
@@ -229,10 +234,11 @@ export const creepDefaultMemory: Record<CreepRole, CreepMemory> = {
     isStand: false,
     data: {},
     goCache: false,
-    working: false
+    working: false,
+    move: { index: 0 }
   },
   Builder: {
-    crossable: false,
+    crossable: true,
     standed: false,
     role: "Builder",
     ready: false,
@@ -240,10 +246,11 @@ export const creepDefaultMemory: Record<CreepRole, CreepMemory> = {
     isStand: false,
     data: {},
     goCache: false,
-    working: false
+    working: false,
+    move: { index: 0 }
   },
   Filler: {
-    crossable: false,
+    crossable: true,
     standed: false,
     role: "Filler",
     ready: false,
@@ -251,10 +258,11 @@ export const creepDefaultMemory: Record<CreepRole, CreepMemory> = {
     isStand: false,
     data: {},
     goCache: false,
-    working: false
+    working: false,
+    move: { index: 0 }
   },
   Processor: {
-    crossable: false,
+    crossable: true,
     standed: false,
     role: "Processor",
     ready: false,
@@ -262,10 +270,11 @@ export const creepDefaultMemory: Record<CreepRole, CreepMemory> = {
     isStand: false,
     data: {},
     goCache: false,
-    working: false
+    working: false,
+    move: { index: 0 }
   },
   Manager: {
-    crossable: false,
+    crossable: true,
     standed: false,
     role: "Manager",
     ready: false,
@@ -273,10 +282,11 @@ export const creepDefaultMemory: Record<CreepRole, CreepMemory> = {
     isStand: false,
     data: {},
     goCache: false,
-    working: false
+    working: false,
+    move: { index: 0 }
   },
   Defender: {
-    crossable: false,
+    crossable: true,
     standed: false,
     role: "Defender",
     ready: false,
@@ -284,10 +294,11 @@ export const creepDefaultMemory: Record<CreepRole, CreepMemory> = {
     isStand: false,
     data: {},
     goCache: false,
-    working: false
+    working: false,
+    move: { index: 0 }
   },
   Ranged: {
-    crossable: false,
+    crossable: true,
     standed: false,
     role: "Ranged",
     ready: false,
@@ -295,10 +306,11 @@ export const creepDefaultMemory: Record<CreepRole, CreepMemory> = {
     isStand: false,
     data: {},
     goCache: false,
-    working: false
+    working: false,
+    move: { index: 0 }
   },
   Healer: {
-    crossable: false,
+    crossable: true,
     standed: false,
     role: "Healer",
     ready: false,
@@ -306,10 +318,11 @@ export const creepDefaultMemory: Record<CreepRole, CreepMemory> = {
     isStand: false,
     data: {},
     goCache: false,
-    working: false
+    working: false,
+    move: { index: 0 }
   },
   RemoteHarvester: {
-    crossable: false,
+    crossable: true,
     standed: false,
     role: "RemoteHarvester",
     ready: false,
@@ -317,10 +330,11 @@ export const creepDefaultMemory: Record<CreepRole, CreepMemory> = {
     isStand: false,
     data: {},
     goCache: false,
-    working: false
+    working: false,
+    move: { index: 0 }
   },
   RemoteDefender: {
-    crossable: false,
+    crossable: true,
     standed: false,
     role: "RemoteDefender",
     ready: false,
@@ -328,10 +342,11 @@ export const creepDefaultMemory: Record<CreepRole, CreepMemory> = {
     isStand: false,
     data: {},
     goCache: false,
-    working: false
+    working: false,
+    move: { index: 0 }
   },
   Claimer: {
-    crossable: false,
+    crossable: true,
     standed: false,
     role: "Claimer",
     ready: false,
@@ -339,10 +354,11 @@ export const creepDefaultMemory: Record<CreepRole, CreepMemory> = {
     isStand: false,
     data: {},
     goCache: false,
-    working: false
+    working: false,
+    move: { index: 0 }
   },
   Dismantler: {
-    crossable: false,
+    crossable: true,
     standed: false,
     role: "Dismantler",
     ready: false,
@@ -350,6 +366,7 @@ export const creepDefaultMemory: Record<CreepRole, CreepMemory> = {
     isStand: false,
     data: {},
     goCache: false,
-    working: false
+    working: false,
+    move: { index: 0 }
   }
 }

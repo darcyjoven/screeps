@@ -1,5 +1,3 @@
-import { warn } from "./terminal"
-
 /**
  * 所有单位开始工作
  * @param workders 
@@ -11,11 +9,11 @@ export const work = (...hasMaps: object[]): void => {
         Object.values(obj).forEach(item => {
             if (item.work) {
                 item.work()
-                messages += `id:${item.id}} cost:${Game.cpu.getUsed() - startCost}`
-                startCost = Game.cpu.getUsed()
+                // messages += `id:${item.id}} cost:${Game.cpu.getUsed() - startCost}`
+                // startCost = Game.cpu.getUsed()
             }
         })
-        warn(['main', 'work'], ['cost', messages])
+        // warn(['main', 'work'], ['cost', messages])
     })
 }
 

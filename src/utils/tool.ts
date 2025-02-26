@@ -20,3 +20,22 @@ export const removeArray = <T>(list: T[], predicate: (item: T) => boolean, cnt: 
 };
 
 export const generateCreepId = (): string => Math.random().toString(36).substring(2, 5);
+
+/**
+ * 将数字转为0~9a~zA~Z格式
+ * 
+ * 结果为2位数组
+ * @param n 
+ * @returns 
+ */
+export const numberToMultiChar = (n: number): string => {
+    let chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    if (n === 0) return '00'
+    let result = []
+    while (n > 0) {
+        result.push(chars[n % chars.length])
+        n = Math.floor(n / chars.length)
+    }
+    const str = result.reverse().join('')
+    return str.padStart(2, '0').slice(0, 2)
+}

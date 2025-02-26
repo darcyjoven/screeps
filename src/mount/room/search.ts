@@ -172,4 +172,9 @@ export default class SearchExtension extends LayoutExtension {
         }
         return structure
     }
+    public hasFiller(): boolean {
+        return _.values(Game.creeps)
+            .filter(c => c.room.name === this.name && c.memory.role === 'Filler')
+            .length > 0
+    }
 }

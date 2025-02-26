@@ -43,7 +43,7 @@ export const transferTaskOperations: Record<TransferTaskConstant, TransferTaskOp
             }
             // 这里应该是extension填满之后，再返回OK
             const result = creep.giveTo(target, RESOURCE_ENERGY)
-            if (result != OK && result != ERR_NOT_IN_RANGE) creep.say(`extension ${result}`)
+            if (result !== OK && result !== ERR_NOT_IN_RANGE) creep.log(`extension ${result}`)
             if (creep.store[RESOURCE_ENERGY] === 0) return true
             return false
         }
